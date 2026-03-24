@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Mon Restaurant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       VARIABLES & RESET
+    ============================================================ */
+    :root {
+      --primary: #E8401C;
+      --primary-dark: #C4310F;
+      --secondary: #1A1A2E;
+      --accent: #F5A623;
+      --bg: #FAF9F7;
+      --card-bg: #FFFFFF;
+      --text: #1A1A1A;
+      --text-muted: #6B7280;
+      --border: #E5E7EB;
+      --success: #10B981;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --shadow: 0 2px 16px rgba(0,0,0,0.08);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,0.14);
+      --transition: 0.2s ease;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    img { max-width: 100%; }
+    button { cursor: pointer; font-family: inherit; border: none; outline: none; }
+    input { font-family: inherit; outline: none; }
+
+    /* ============================================================
+       APP SHELL
+    ============================================================ */
+    #app { min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* ============================================================
+       PAGES (SPA)
+    ============================================================ */
+    .page { display: none; flex-direction: column; flex: 1; }
+    .page.active { display: flex; }
+
+    /* ============================================================
+       HEADER
+    ============================================================ */
+    .app-header {
+      background: var(--card-bg);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+    }
+    .header-back {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      transition: background var(--transition);
+    }
+    .header-back:hover { background: var(--border); }
+    .header-title { font-size: 17px; font-weight: 700; color: var(--text); }
+    .header-cart-btn {
+      position: relative;
+      background: var(--primary);
+      color: white;
+      border-radius: 20px;
+      padding: 8px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex; align-items: center; gap: 6px;
+      transition: background var(--transition);
+    }
+    .header-cart-btn:hover { background: var(--primary-dark); }
+    .cart-badge {
+      background: white;
+      color: var(--primary);
+      border-radius: 50%;
+      width: 20px; height: 20px;
+      font-size: 11px;
+      font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ============================================================
+       PAGE 1 — ACCUEIL
+    ============================================================ */
+    #page-home {
+      background: linear-gradient(160deg, #1A1A2E 0%, #2d1b69 50%, #1a1a2e 100%);
+      justify-content: center;
+      align-items: center;
+      padding: 40px 24px;
+      min-height: 100vh;
+    }
+    .home-container {
+      text-align: center;
+      max-width: 360px;
+      width: 100%;
+    }
+    .home-logo-wrap {
+      width: 110px; height: 110px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 28px;
+      margin: 0 auto 28px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 52px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .home-name {
+      font-size: 32px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 10px;
+      letter-spacing: -0.5px;
+    }
+    .home-tagline {
+      font-size: 15px;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 48px;
+      line-height: 1.5;
+    }
+    .home-cta {
+      display: block;
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      padding: 18px 24px;
+      border-radius: 14px;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      transition: all var(--transition);
+      box-shadow: 0 4px 20px rgba(232,64,28,0.4);
+    }
+    .home-cta:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    .home-cta:active { transform: translateY(0); }
+    .home-top-logo {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 10;
+    }
+    .home-top-logo-icon {
+      width: 42px; height: 42px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .home-top-logo-icon svg { width: 24px; height: 24px; }
+    .home-top-logo-text {
+      font-size: 15px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.85);
+      letter-spacing: 0.3px;
+    }
+    .home-decoration {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.07;
+      background: white;
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       PAGE 2 — MENU
+    ============================================================ */
+    #page-menu { background: var(--bg); }
+    .menu-tabs-wrap {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 65px;
+      z-index: 90;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .menu-tabs-wrap::-webkit-scrollbar { display: none; }
+    .menu-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 16px;
+      min-width: max-content;
+    }
+    .tab-btn {
+      padding: 14px 18px;
+      background: none;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      transition: all var(--transition);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .menu-section-title {
+      font-size: 20px;
+      font-weight: 800;
+      padding: 20px 20px 12px;
+      color: var(--text);
+    }
+    .menu-grid {
+      padding: 0 16px 100px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .menu-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: stretch;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .menu-card:active { transform: scale(0.98); }
+    .menu-card-img {
+      width: 110px;
+      min-height: 110px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #f0ede8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      overflow: hidden;
+    }
+    .menu-card-img img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .menu-card-options {
+      font-size: 11px; color: #6366F1; font-weight: 600; margin-top: 2px;
+    }
+    .menu-card-body {
+      flex: 1;
+      padding: 14px 14px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .menu-card-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .menu-card-desc { font-size: 13px; color: var(--text-muted); line-height: 1.45; flex: 1; margin-bottom: 10px; }
+    .menu-card-footer { display: flex; align-items: center; justify-content: space-between; }
+    .menu-card-price { font-size: 17px; font-weight: 800; color: var(--primary); }
+    .add-btn {
+      background: var(--primary);
+      color: white;
+      border-radius: 10px;
+      width: 36px; height: 36px;
+      font-size: 22px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all var(--transition);
+      line-height: 1;
+    }
+    .add-btn:hover { background: var(--primary-dark); transform: scale(1.05); }
+    .add-btn.in-cart {
+      background: var(--success);
+      font-size: 16px;
+    }
+    .menu-card-qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .qty-btn {
+      width: 30px; height: 30px;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      transition: all var(--transition);
+    }
+    .qty-btn.minus { background: #FEE2E2; color: #EF4444; }
+    .qty-btn.plus { background: var(--primary); color: white; }
+    .qty-display { font-size: 16px; font-weight: 700; min-width: 20px; text-align: center; }
+
+    /* Floating cart bar */
+    .cart-bar {
+      position: fixed;
+      bottom: 20px;
+      left: 16px; right: 16px;
+      background: var(--secondary);
+      color: white;
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-lg);
+      z-index: 200;
+      transition: all 0.3s ease;
+      transform: translateY(100px);
+      opacity: 0;
+    }
+    .cart-bar.visible { transform: translateY(0); opacity: 1; }
+    .cart-bar-info { display: flex; flex-direction: column; }
+    .cart-bar-count { font-size: 13px; color: rgba(255,255,255,0.7); }
+    .cart-bar-total { font-size: 18px; font-weight: 800; }
+    .cart-bar-btn {
+      background: var(--primary);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    /* ============================================================
+       PAGE 3 — PANIER
+    ============================================================ */
+    #page-cart { background: var(--bg); }
+    .cart-content { padding: 16px 16px 120px; }
+    .cart-item {
+      background: var(--card-bg);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow);
+    }
+    .cart-item-emoji { font-size: 32px; width: 42px; text-align: center; }
+    .cart-item-info { flex: 1; }
+    .cart-item-name { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+    .cart-item-price { font-size: 14px; color: var(--text-muted); }
+    .cart-item-controls { display: flex; align-items: center; gap: 8px; }
+    .cart-remove {
+      width: 28px; height: 28px;
+      border-radius: 7px;
+      background: #FEE2E2;
+      color: #EF4444;
+      font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cart-qty-btn {
+      width: 28px; height: 28px;
+      border-radius: 7px;
+      font-size: 16px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cart-qty-btn.minus { background: #F3F4F6; color: var(--text); }
+    .cart-qty-btn.plus { background: var(--primary); color: white; }
+    .cart-qty { font-size: 15px; font-weight: 700; min-width: 24px; text-align: center; }
+    .cart-item-subtotal { font-size: 15px; font-weight: 700; min-width: 55px; text-align: right; }
+
+    .cart-summary {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 16px;
+      box-shadow: var(--shadow);
+    }
+    .cart-summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      font-size: 15px;
+    }
+    .cart-summary-row.total {
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+      padding-top: 14px;
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .cart-total-amount { color: var(--primary); font-weight: 800; }
+    .cart-cta {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--card-bg);
+      padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+    }
+    .btn-primary {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      padding: 16px;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      transition: all var(--transition);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { background: #D1D5DB; cursor: not-allowed; }
+    .empty-cart {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .empty-cart-icon { font-size: 64px; margin-bottom: 16px; }
+    .empty-cart h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+
+    /* ============================================================
+       PAGE 4 — PAIEMENT
+    ============================================================ */
+    #page-payment { background: var(--bg); }
+    .payment-content { padding: 16px 16px 120px; }
+    .payment-section {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+    .payment-section-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .payment-section-title span { font-size: 20px; }
+
+    /* Table selector */
+    .table-selector {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    .table-btn {
+      border: 2px solid #E2E8F0;
+      background: white;
+      border-radius: 12px;
+      padding: 12px 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: #1E293B;
+      cursor: pointer;
+      transition: all .2s;
+      text-align: center;
+    }
+    .table-btn:hover { border-color: #6366F1; background: #EEF2FF; }
+    .table-btn.selected {
+      border-color: #6366F1;
+      background: #6366F1;
+      color: white;
+      box-shadow: 0 4px 12px rgba(99,102,241,.35);
+    }
+
+    /* Tip selector */
+    .tip-mode-tabs { display: flex; gap: 0; margin-bottom: 14px; border-radius: 12px; overflow: hidden; border: 2px solid #E5E7EB; }
+    .tip-mode-tab {
+      flex: 1; padding: 10px 8px; font-size: 14px; font-weight: 700;
+      text-align: center; background: white; color: #6B7280; transition: all 0.2s;
+    }
+    .tip-mode-tab.active { background: #6366F1; color: white; }
+    .tip-pct-row { display: flex; align-items: center; gap: 12px; justify-content: center; }
+    .tip-scroll-col {
+      position: relative; height: 120px; width: 80px; overflow: hidden;
+      border-radius: 14px; border: 2px solid #E5E7EB; background: #F9FAFB;
+    }
+    .tip-scroll-col::before, .tip-scroll-col::after {
+      content: ''; position: absolute; left: 0; right: 0; height: 38px; z-index: 2; pointer-events: none;
+    }
+    .tip-scroll-col::before { top: 0; background: linear-gradient(to bottom, #F9FAFB 30%, transparent); }
+    .tip-scroll-col::after { bottom: 0; background: linear-gradient(to top, #F9FAFB 30%, transparent); }
+    .tip-scroll-highlight {
+      position: absolute; top: 50%; left: 6px; right: 6px; height: 40px; transform: translateY(-50%);
+      background: #EEF2FF; border: 2px solid #6366F1; border-radius: 10px; z-index: 1;
+    }
+    .tip-scroll-list {
+      position: absolute; top: 0; left: 0; right: 0; z-index: 3;
+      overflow-y: scroll; height: 100%; scroll-snap-type: y mandatory;
+      -ms-overflow-style: none; scrollbar-width: none;
+    }
+    .tip-scroll-list::-webkit-scrollbar { display: none; }
+    .tip-scroll-item {
+      height: 40px; display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 800; color: #9CA3AF; scroll-snap-align: center;
+      transition: color 0.15s;
+    }
+    .tip-scroll-item.selected { color: #6366F1; }
+    .tip-result {
+      font-size: 15px; color: #6B7280; margin-top: 10px; text-align: center; font-weight: 600;
+    }
+    .tip-result strong { color: #6366F1; font-size: 18px; }
+    .tip-free-input {
+      display: flex; align-items: center; gap: 10px; justify-content: center; padding: 10px 0;
+    }
+    .tip-free-input input {
+      width: 120px; padding: 14px 16px; border-radius: 14px; border: 2px solid #E5E7EB;
+      font-size: 22px; font-weight: 800; text-align: center; color: #1A1A1A;
+      background: #F9FAFB; transition: border-color 0.2s;
+    }
+    .tip-free-input input:focus { border-color: #6366F1; background: #EEF2FF; }
+    .tip-free-input .tip-currency { font-size: 22px; font-weight: 800; color: #6366F1; }
+    .tip-none-btn {
+      display: block; margin: 10px auto 0; padding: 8px 20px; border-radius: 10px;
+      border: 2px solid #E5E7EB; background: white; font-size: 13px;
+      font-weight: 600; color: #9CA3AF; transition: all 0.2s;
+    }
+    .tip-none-btn.active { border-color: #6366F1; background: #EEF2FF; color: #6366F1; }
+
+    .form-group { margin-bottom: 14px; }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 13px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      transition: border-color var(--transition);
+      background: var(--bg);
+    }
+    .form-input:focus { border-color: var(--primary); background: white; }
+    .form-hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    .payment-methods { display: flex; flex-direction: column; gap: 10px; }
+    .payment-method-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .payment-method-card:hover { border-color: var(--primary); }
+    .payment-method-card.selected {
+      border-color: var(--primary);
+      background: #FFF5F3;
+    }
+    .payment-method-icon { font-size: 26px; width: 36px; text-align: center; }
+    .payment-method-info { flex: 1; }
+    .payment-method-name { font-size: 15px; font-weight: 700; }
+    .payment-method-desc { font-size: 13px; color: var(--text-muted); }
+    .payment-method-radio {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      transition: all var(--transition);
+    }
+    .payment-method-card.selected .payment-method-radio {
+      border-color: var(--primary);
+      background: var(--primary);
+    }
+    .payment-method-card.selected .payment-method-radio::after {
+      content: '';
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: white;
+    }
+    .badge-online {
+      background: #D1FAE5;
+      color: #059669;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+    .badge-counter {
+      background: #FEF3C7;
+      color: #D97706;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    .order-recap {
+      border-top: 1px solid var(--border);
+      margin-top: 14px;
+      padding-top: 14px;
+    }
+    .order-recap-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      padding: 3px 0;
+      color: var(--text-muted);
+    }
+    .order-recap-row.total {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text);
+      margin-top: 8px;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+    }
+    .order-recap-row.subtotal {
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 6px;
+    }
+    .order-recap-divider {
+      border: none;
+      border-top: 1px dashed var(--border);
+      margin: 8px 0;
+    }
+
+    /* ============================================================
+       PAGE 5 — CONFIRMATION
+    ============================================================ */
+    #page-confirm { background: var(--bg); }
+    .confirm-content {
+      padding: 40px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .confirm-icon-wrap {
+      width: 90px; height: 90px;
+      background: #D1FAE5;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 48px;
+      margin-bottom: 24px;
+      animation: popIn 0.4s ease;
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.5); opacity: 0; }
+      80% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .confirm-title { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+    .confirm-subtitle { font-size: 15px; color: var(--text-muted); margin-bottom: 32px; }
+    .confirm-order-num {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 20px 32px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      width: 100%;
+    }
+    .confirm-order-num-label { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .confirm-order-num-val { font-size: 36px; font-weight: 900; color: var(--primary); letter-spacing: -1px; }
+    .confirm-recap {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 20px;
+      width: 100%;
+      box-shadow: var(--shadow);
+      text-align: left;
+      margin-bottom: 20px;
+    }
+    .confirm-recap-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+    .confirm-recap-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .confirm-recap-item:last-child { border-bottom: none; }
+    .confirm-recap-item-name { color: var(--text-muted); }
+    .confirm-recap-item-price { font-weight: 600; }
+    .confirm-email-notice {
+      background: #EFF6FF;
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      font-size: 14px;
+      color: #1D4ED8;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      width: 100%;
+      text-align: left;
+    }
+    .confirm-payment-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+    .confirm-payment-badge.online { background: #D1FAE5; color: #059669; }
+    .confirm-payment-badge.counter { background: #FEF3C7; color: #D97706; }
+    .btn-new-order {
+      width: 100%;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      color: var(--text);
+      padding: 14px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      margin-top: 16px;
+    }
+
+    /* ============================================================
+       TOAST NOTIFICATIONS
+    ============================================================ */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-80px);
+      background: var(--secondary);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 999;
+      transition: transform 0.3s ease;
+      white-space: nowrap;
+      display: flex; align-items: center; gap: 8px;
+      box-shadow: var(--shadow-lg);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ============================================================
+       LOADERS
+    ============================================================ */
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ======================== PAGE 1 — ACCUEIL ======================== -->
+  <div class="page active" id="page-home">
+    <div class="home-top-logo">
+      <div class="home-top-logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="rgba(232,64,28,0.9)"/>
+          <path d="M8.5 7.5v9M12 7.5v3.5c0 1.5 3 1.5 3 0V7.5M15.5 14v2.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="home-top-logo-text">MR</span>
+    </div>
+    <div class="home-container">
+      <div class="home-logo-wrap" id="home-logo">🍽️</div>
+      <h1 class="home-name" id="home-name">Mon Restaurant</h1>
+      <p class="home-tagline" id="home-tagline">Commandez directement depuis votre table,<br>sans attendre.</p>
+      <button class="home-cta" onclick="goToMenu()">Voir la carte 🍴</button>
+    </div>
+  </div>
+
+  <!-- ======================== PAGE 2 — MENU ======================== -->
+  <div class="page" id="page-menu">
+    <div class="app-header">
+      <button class="header-back" onclick="goTo('page-home')">←</button>
+      <span class="header-title" style="position:absolute;left:50%;transform:translateX(-50%);">Notre Carte</span>
+      <button class="header-cart-btn" id="header-cart-btn" onclick="goTo('page-cart')" style="display:none">
+        🛒 <span class="cart-badge" id="header-cart-count">0</span>
+      </button>
+      <div style="width:38px" id="header-cart-placeholder"></div>
+    </div>
+
+    <div class="menu-tabs-wrap">
+      <div class="menu-tabs" id="menu-tabs"></div>
+    </div>
+
+    <div id="menu-categories"></div>
+
+    <!-- Floating cart bar -->
+    <div class="cart-bar" id="cart-bar" onclick="goTo('page-cart')">
+      <div class="cart-bar-info">
+        <span class="cart-bar-count" id="cart-bar-count">0 article</span>
+        <span class="cart-bar-total" id="cart-bar-total">0,00 €</span>
+      </div>
+      <button class="cart-bar-btn">Voir le panier →</button>
+    </div>
+  </div>
+
+  <!-- ======================== PAGE 3 — PANIER ======================== -->
+  <div class="page" id="page-cart">
+    <div class="app-header">
+      <button class="header-back" onclick="goTo('page-menu')">←</button>
+      <span class="header-title">Mon Panier</span>
+      <div style="width:38px"></div>
+    </div>
+    <div class="cart-content" id="cart-content"></div>
+    <div class="cart-cta">
+      <button class="btn-primary" id="cart-order-btn" onclick="goTo('page-payment')" disabled>
+        Passer commande
+      </button>
+    </div>
+  </div>
+
+  <!-- ======================== PAGE 4 — PAIEMENT ======================== -->
+  <div class="page" id="page-payment">
+    <div class="app-header">
+      <button class="header-back" onclick="goTo('page-cart')">←</button>
+      <span class="header-title">Paiement</span>
+      <div style="width:38px"></div>
+    </div>
+    <div class="payment-content">
+      <!-- Numéro de table -->
+      <div class="payment-section">
+        <div class="payment-section-title"><span>🪑</span> Numéro de table *</div>
+        <div class="table-selector" id="table-selector">
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="payment-section">
+        <div class="payment-section-title"><span>📧</span> Votre email</div>
+        <div class="form-group">
+          <label class="form-label">Adresse email *</label>
+          <input type="email" class="form-input" id="payment-email"
+            placeholder="exemple@email.com"
+            oninput="validatePaymentForm()" />
+          <div class="form-hint">Votre ticket de caisse sera envoyé à cette adresse.</div>
+        </div>
+      </div>
+
+      <!-- Mode de paiement -->
+      <div class="payment-section">
+        <div class="payment-section-title"><span>💳</span> Mode de paiement</div>
+        <div class="payment-methods" id="payment-methods">
+          <div class="payment-method-card" onclick="selectPayment('apple_pay')" data-method="apple_pay">
+            <div class="payment-method-icon"> </div>
+            <div class="payment-method-info">
+              <div class="payment-method-name">Apple Pay</div>
+              <div class="payment-method-desc">Paiement rapide &amp; sécurisé</div>
+            </div>
+            <span class="badge-online">En ligne</span>
+            <div class="payment-method-radio"></div>
+          </div>
+          <div class="payment-method-card" onclick="selectPayment('google_pay')" data-method="google_pay">
+            <div class="payment-method-icon">G</div>
+            <div class="payment-method-info">
+              <div class="payment-method-name">Google Pay</div>
+              <div class="payment-method-desc">Paiement rapide &amp; sécurisé</div>
+            </div>
+            <span class="badge-online">En ligne</span>
+            <div class="payment-method-radio"></div>
+          </div>
+          <div class="payment-method-card" onclick="selectPayment('card_online')" data-method="card_online">
+            <div class="payment-method-icon">💳</div>
+            <div class="payment-method-info">
+              <div class="payment-method-name">Carte bancaire en ligne</div>
+              <div class="payment-method-desc">Visa, Mastercard, CB</div>
+            </div>
+            <span class="badge-online">En ligne</span>
+            <div class="payment-method-radio"></div>
+          </div>
+          <div class="payment-method-card" onclick="selectPayment('card_counter')" data-method="card_counter">
+            <div class="payment-method-icon">🏧</div>
+            <div class="payment-method-info">
+              <div class="payment-method-name">Carte bancaire au comptoir</div>
+              <div class="payment-method-desc">Règlement à la fin du repas</div>
+            </div>
+            <span class="badge-counter">Au comptoir</span>
+            <div class="payment-method-radio"></div>
+          </div>
+          <div class="payment-method-card" onclick="selectPayment('cash')" data-method="cash">
+            <div class="payment-method-icon">💵</div>
+            <div class="payment-method-info">
+              <div class="payment-method-name">Espèces au comptoir</div>
+              <div class="payment-method-desc">Règlement en cash à la fin</div>
+            </div>
+            <span class="badge-counter">Au comptoir</span>
+            <div class="payment-method-radio"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pourboire -->
+      <div class="payment-section">
+        <div class="payment-section-title"><span>💝</span> Pourboire (optionnel)</div>
+        <div class="tip-mode-tabs">
+          <button class="tip-mode-tab active" onclick="switchTipMode('pct')">% Pourcentage</button>
+          <button class="tip-mode-tab" onclick="switchTipMode('free')">€ Montant libre</button>
+        </div>
+        <!-- Mode pourcentage -->
+        <div id="tip-mode-pct">
+          <div class="tip-pct-row">
+            <div class="tip-scroll-col">
+              <div class="tip-scroll-highlight"></div>
+              <div class="tip-scroll-list" id="tip-scroll">
+                <!-- Rempli par JS : 0% → 25% -->
+              </div>
+            </div>
+          </div>
+          <div class="tip-result" id="tip-pct-result">Pas de pourboire</div>
+        </div>
+        <!-- Mode montant libre -->
+        <div id="tip-mode-free" style="display:none">
+          <div class="tip-free-input">
+            <input type="number" id="tip-free-amount" min="0" step="0.5" placeholder="0" oninput="onFreeTipInput()" />
+            <span class="tip-currency">€</span>
+          </div>
+        </div>
+        <button class="tip-none-btn active" id="tip-none-btn" onclick="clearTip()">Pas de pourboire</button>
+      </div>
+
+      <!-- Récapitulatif -->
+      <div class="payment-section">
+        <div class="payment-section-title"><span>📋</span> Récapitulatif</div>
+        <div id="payment-recap"></div>
+      </div>
+    </div>
+
+    <div class="cart-cta">
+      <button class="btn-primary" id="pay-btn" onclick="submitOrder()" disabled>
+        Confirmer la commande
+      </button>
+    </div>
+  </div>
+
+  <!-- ======================== PAGE 5 — CONFIRMATION ======================== -->
+  <div class="page" id="page-confirm">
+    <div class="app-header">
+      <div style="width:38px"></div>
+      <span class="header-title">Commande confirmée</span>
+      <div style="width:38px"></div>
+    </div>
+    <div class="confirm-content">
+      <div class="confirm-icon-wrap">✅</div>
+      <h2 class="confirm-title">Merci !</h2>
+      <p class="confirm-subtitle" id="confirm-subtitle">Votre commande a bien été enregistrée.</p>
+
+      <div class="confirm-order-num">
+        <div class="confirm-order-num-label">Numéro de commande</div>
+        <div class="confirm-order-num-val" id="confirm-order-num">#000</div>
+      </div>
+
+      <div class="confirm-table-num" id="confirm-table-num" style="margin:10px auto 0;font-size:16px;font-weight:700;color:#6366F1;">🪑 Table <span id="confirm-table-val"></span></div>
+
+      <div class="confirm-payment-badge" id="confirm-payment-badge"></div>
+
+      <div class="confirm-recap" id="confirm-recap"></div>
+
+      <div class="confirm-email-notice">
+        <span style="font-size:20px">📧</span>
+        <span>Un ticket de caisse a été envoyé à <strong id="confirm-email-shown"></strong></span>
+      </div>
+
+      <button class="btn-new-order" onclick="newOrder()">Nouvelle commande 🔄</button>
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCK0G7cJ3NnA3sP-GPb08MdfwwPVSmx2Wg",
+    authDomain: "mon-restaurant-29980.firebaseapp.com",
+    projectId: "mon-restaurant-29980",
+    storageBucket: "mon-restaurant-29980.firebasestorage.app",
+    messagingSenderId: "78241830692",
+    appId: "1:78241830692:web:09bf6f6606147f5d3cc5b1"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+
+<script>
+/* ============================================================
+   AUDIT LOG
+============================================================ */
+async function logEvent(orderId, eventType, details) {
+  const logEntry = {
+    orderId,
+    eventType,
+    details,
+    timestamp: new Date().toISOString(),
+    user: 'customer'
+  };
+  try {
+    await db.collection('audit_log').add(logEntry);
+  } catch (e) {
+    console.error('Erreur log audit:', e);
+  }
+}
+
+/* ============================================================
+   DONNÉES DU MENU — chargées depuis Firestore
+   Structure: { id, name, desc, price, emoji, photo, options, available }
+============================================================ */
+let MENU_DATA = {};
+let menuLoaded = false;
+
+async function loadMenuFromFirestore() {
+  try {
+    const doc = await db.collection('config').doc('menu').get();
+    if (doc.exists) {
+      MENU_DATA = doc.data();
+      menuLoaded = true;
+      menuLoaded = true;
+    } else {
+      // Fallback: menu par défaut si rien dans Firestore
+      MENU_DATA = getDefaultMenu();
+      menuLoaded = true;
+    }
+  } catch (e) {
+    console.warn('Erreur chargement menu Firestore, utilisation du fallback:', e);
+    MENU_DATA = getDefaultMenu();
+    menuLoaded = true;
+  }
+}
+
+function getDefaultMenu() {
+  return {
+    entrees: { label: "🥗 Entrées", order: 0, items: [
+      { id: "e1", name: "Soupe à l'oignon gratinée", desc: "Bouillon de bœuf, croutons, gruyère fondu", price: 8.50, emoji: "🍲", available: true },
+      { id: "e2", name: "Foie gras maison", desc: "Foie gras de canard, chutney de figues, brioche", price: 16.00, emoji: "🫙", available: true },
+    ]},
+    plats: { label: "🥩 Plats", order: 1, items: [
+      { id: "p1", name: "Entrecôte grillée", desc: "Entrecôte de bœuf, sauce béarnaise, frites maison", price: 26.00, emoji: "🥩", available: true },
+      { id: "p2", name: "Poulet rôti fermier", desc: "Poulet Label Rouge, jus de volaille, pommes vapeur", price: 18.00, emoji: "🍗", available: true },
+    ]},
+    desserts: { label: "🍮 Desserts", order: 2, items: [
+      { id: "d1", name: "Crème brûlée", desc: "Crème vanillée, caramel croustillant", price: 7.50, emoji: "🍮", available: true },
+    ]},
+    boissons: { label: "🥤 Boissons", order: 3, items: [
+      { id: "b1", name: "Eau minérale 75cl", desc: "Évian ou Perrier", price: 4.00, emoji: "💧", available: true },
+      { id: "b2", name: "Café espresso", desc: "Arabica 100%", price: 2.50, emoji: "☕", available: true },
+    ]}
+  };
+}
+
+/* ============================================================
+   ÉTAT DE L'APPLICATION
+============================================================ */
+let cart = {}; // { itemId: { item, qty } }
+let selectedPaymentMethod = null;
+let selectedTable = null;
+let selectedTip = 0;
+let currentOrderId = null;
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+function goTo(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+async function goToMenu() {
+  goTo('page-menu');
+  if (!menuLoaded) {
+    document.getElementById('menu-categories').innerHTML = '<div style="text-align:center;padding:40px;color:#888">Chargement du menu...</div>';
+    await loadMenuFromFirestore();
+  }
+  renderMenu();
+}
+
+/* ============================================================
+   RENDU DU MENU
+============================================================ */
+function renderMenu() {
+  const tabsEl = document.getElementById('menu-tabs');
+  const categoriesEl = document.getElementById('menu-categories');
+  tabsEl.innerHTML = '';
+  categoriesEl.innerHTML = '';
+
+  // Trier les catégories par order
+  const categories = Object.keys(MENU_DATA).sort((a, b) => {
+    return (MENU_DATA[a].order ?? 999) - (MENU_DATA[b].order ?? 999);
+  });
+  categories.forEach((cat, idx) => {
+    const data = MENU_DATA[cat];
+    // Tab
+    const tab = document.createElement('button');
+    tab.className = 'tab-btn' + (idx === 0 ? ' active' : '');
+    tab.textContent = data.label;
+    tab.onclick = () => switchTab(cat);
+    tab.dataset.cat = cat;
+    tabsEl.appendChild(tab);
+
+    // Content
+    const section = document.createElement('div');
+    section.className = 'tab-content' + (idx === 0 ? ' active' : '');
+    section.id = 'tab-' + cat;
+
+    const grid = document.createElement('div');
+    grid.className = 'menu-grid';
+
+    data.items.filter(item => item.available).forEach(item => {
+      grid.appendChild(renderMenuCard(item));
+    });
+
+    section.appendChild(grid);
+    categoriesEl.appendChild(section);
+  });
+}
+
+function renderMenuCard(item) {
+  const card = document.createElement('div');
+  card.className = 'menu-card';
+  card.id = 'card-' + item.id;
+
+  const qty = cart[item.id] ? cart[item.id].qty : 0;
+  const imgHtml = item.photo
+    ? `<div class="menu-card-img"><img src="${item.photo}" alt="${item.name}" /></div>`
+    : `<div class="menu-card-img">${item.emoji}</div>`;
+  const optionsHtml = item.options && item.options.length
+    ? `<div class="menu-card-options">+${item.options.length} option(s) disponible(s)</div>`
+    : '';
+  card.innerHTML = `
+    ${imgHtml}
+    <div class="menu-card-body">
+      <div>
+        <div class="menu-card-name">${item.name}</div>
+        <div class="menu-card-desc">${item.desc}</div>
+        ${optionsHtml}
+      </div>
+      <div class="menu-card-footer">
+        <div class="menu-card-price">${formatPrice(item.price)}</div>
+        ${qty === 0
+          ? `<button class="add-btn" onclick="addToCart('${item.id}')">+</button>`
+          : `<div class="menu-card-qty-controls">
+               <button class="qty-btn minus" onclick="removeFromCart('${item.id}')">−</button>
+               <span class="qty-display">${qty}</span>
+               <button class="qty-btn plus" onclick="addToCart('${item.id}')">+</button>
+             </div>`
+        }
+      </div>
+    </div>
+  `;
+  return card;
+}
+
+function switchTab(cat) {
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.cat === cat);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => {
+    c.classList.toggle('active', c.id === 'tab-' + cat);
+  });
+}
+
+/* ============================================================
+   GESTION DU PANIER
+============================================================ */
+function addToCart(itemId) {
+  const item = findItem(itemId);
+  if (!item) return;
+  if (cart[itemId]) {
+    cart[itemId].qty++;
+  } else {
+    cart[itemId] = { item, qty: 1 };
+  }
+  updateCartUI();
+  updateMenuCardUI(itemId);
+  showToast('✅ ' + item.name + ' ajouté');
+}
+
+function removeFromCart(itemId) {
+  if (!cart[itemId]) return;
+  cart[itemId].qty--;
+  if (cart[itemId].qty <= 0) delete cart[itemId];
+  updateCartUI();
+  updateMenuCardUI(itemId);
+}
+
+/* ---- Tip : mode & scroll ---- */
+let tipMode = 'pct'; // 'pct' | 'free'
+let selectedPct = 0;
+
+function switchTipMode(mode) {
+  tipMode = mode;
+  document.querySelectorAll('.tip-mode-tab').forEach((t, i) => {
+    t.classList.toggle('active', (i === 0 && mode === 'pct') || (i === 1 && mode === 'free'));
+  });
+  document.getElementById('tip-mode-pct').style.display = mode === 'pct' ? '' : 'none';
+  document.getElementById('tip-mode-free').style.display = mode === 'free' ? '' : 'none';
+  if (mode === 'pct') {
+    applyPctTip(selectedPct);
+  } else {
+    onFreeTipInput();
+  }
+}
+
+function initTipScroll() {
+  const list = document.getElementById('tip-scroll');
+  if (!list) return;
+  list.innerHTML = '';
+  // Padding items top (1 empty item for scroll centering)
+  list.innerHTML += '<div class="tip-scroll-item" data-pct="-1"></div>';
+  for (let p = 0; p <= 25; p++) {
+    list.innerHTML += '<div class="tip-scroll-item" data-pct="' + p + '">' + p + '%</div>';
+  }
+  // Padding item bottom
+  list.innerHTML += '<div class="tip-scroll-item" data-pct="-1"></div>';
+  // Listen scroll
+  list.addEventListener('scroll', onTipScroll);
+  // Click items
+  list.querySelectorAll('.tip-scroll-item').forEach(el => {
+    el.addEventListener('click', function() {
+      const pct = parseInt(this.dataset.pct);
+      if (pct >= 0) scrollToPct(pct);
+    });
+  });
+  // Init at 0%
+  setTimeout(() => scrollToPct(0, false), 50);
+}
+
+function scrollToPct(pct, smooth) {
+  const list = document.getElementById('tip-scroll');
+  const target = list.querySelector('[data-pct="' + pct + '"]');
+  if (!target) return;
+  const offset = target.offsetTop - (list.clientHeight / 2) + 20;
+  list.scrollTo({ top: offset, behavior: smooth !== false ? 'smooth' : 'auto' });
+}
+
+function onTipScroll() {
+  const list = document.getElementById('tip-scroll');
+  const center = list.scrollTop + list.clientHeight / 2;
+  let closest = null;
+  let closestDist = Infinity;
+  list.querySelectorAll('.tip-scroll-item').forEach(el => {
+    const pct = parseInt(el.dataset.pct);
+    if (pct < 0) return;
+    const mid = el.offsetTop + 20;
+    const dist = Math.abs(center - mid);
+    if (dist < closestDist) { closestDist = dist; closest = pct; }
+  });
+  if (closest !== null && closest !== selectedPct) {
+    selectedPct = closest;
+    // Highlight selected
+    list.querySelectorAll('.tip-scroll-item').forEach(el => {
+      el.classList.toggle('selected', parseInt(el.dataset.pct) === closest);
+    });
+    applyPctTip(closest);
+  }
+}
+
+function applyPctTip(pct) {
+  selectedPct = pct;
+  const total = cartTotal();
+  selectedTip = Math.round(total * pct / 100 * 100) / 100;
+  const resultEl = document.getElementById('tip-pct-result');
+  const noneBtn = document.getElementById('tip-none-btn');
+  if (pct === 0) {
+    resultEl.innerHTML = 'Pas de pourboire';
+    noneBtn.classList.add('active');
+  } else {
+    resultEl.innerHTML = pct + '% = <strong>' + formatPrice(selectedTip) + '</strong>';
+    noneBtn.classList.remove('active');
+  }
+  renderPaymentRecap();
+}
+
+function onFreeTipInput() {
+  const input = document.getElementById('tip-free-amount');
+  const val = parseFloat(input.value);
+  const noneBtn = document.getElementById('tip-none-btn');
+  if (isNaN(val) || val <= 0) {
+    selectedTip = 0;
+    noneBtn.classList.add('active');
+  } else {
+    selectedTip = Math.round(val * 100) / 100;
+    noneBtn.classList.remove('active');
+  }
+  renderPaymentRecap();
+}
+
+function clearTip() {
+  selectedTip = 0;
+  selectedPct = 0;
+  document.getElementById('tip-none-btn').classList.add('active');
+  if (tipMode === 'pct') {
+    scrollToPct(0);
+    document.getElementById('tip-pct-result').innerHTML = 'Pas de pourboire';
+  } else {
+    document.getElementById('tip-free-amount').value = '';
+  }
+  renderPaymentRecap();
+}
+
+function findItem(itemId) {
+  for (const cat of Object.values(MENU_DATA)) {
+    const item = cat.items.find(i => i.id === itemId);
+    if (item) return item;
+  }
+  return null;
+}
+
+function cartItemCount() {
+  return Object.values(cart).reduce((sum, c) => sum + c.qty, 0);
+}
+
+function cartTotal() {
+  return Object.values(cart).reduce((sum, c) => sum + c.item.price * c.qty, 0);
+}
+
+function updateMenuCardUI(itemId) {
+  const card = document.getElementById('card-' + itemId);
+  if (!card) return;
+  const item = findItem(itemId);
+  const qty = cart[itemId] ? cart[itemId].qty : 0;
+  const footer = card.querySelector('.menu-card-footer');
+  const priceEl = footer.querySelector('.menu-card-price');
+  footer.innerHTML = `
+    <div class="menu-card-price">${formatPrice(item.price)}</div>
+    ${qty === 0
+      ? `<button class="add-btn" onclick="addToCart('${itemId}')">+</button>`
+      : `<div class="menu-card-qty-controls">
+           <button class="qty-btn minus" onclick="removeFromCart('${itemId}')">−</button>
+           <span class="qty-display">${qty}</span>
+           <button class="qty-btn plus" onclick="addToCart('${itemId}')">+</button>
+         </div>`
+    }
+  `;
+}
+
+function updateCartUI() {
+  const count = cartItemCount();
+  const total = cartTotal();
+
+  // Header badge
+  const headerBtn = document.getElementById('header-cart-btn');
+  const placeholder = document.getElementById('header-cart-placeholder');
+  if (count > 0) {
+    headerBtn.style.display = 'flex';
+    if (placeholder) placeholder.style.display = 'none';
+    document.getElementById('header-cart-count').textContent = count;
+  } else {
+    headerBtn.style.display = 'none';
+    if (placeholder) placeholder.style.display = 'block';
+  }
+
+  // Cart bar
+  const cartBar = document.getElementById('cart-bar');
+  if (count > 0) {
+    cartBar.classList.add('visible');
+    document.getElementById('cart-bar-count').textContent = count + ' article' + (count > 1 ? 's' : '');
+    document.getElementById('cart-bar-total').textContent = formatPrice(total);
+  } else {
+    cartBar.classList.remove('visible');
+  }
+}
+
+/* ============================================================
+   RENDU DU PANIER (page 3)
+============================================================ */
+function renderCart() {
+  const el = document.getElementById('cart-content');
+  const count = cartItemCount();
+  const total = cartTotal();
+  const btn = document.getElementById('cart-order-btn');
+
+  if (count === 0) {
+    el.innerHTML = `
+      <div class="empty-cart">
+        <div class="empty-cart-icon">🛒</div>
+        <h3>Votre panier est vide</h3>
+        <p>Ajoutez des plats depuis la carte pour commencer.</p>
+      </div>
+    `;
+    btn.disabled = true;
+    return;
+  }
+
+  btn.disabled = false;
+  let html = '';
+  Object.values(cart).forEach(({ item, qty }) => {
+    html += `
+      <div class="cart-item">
+        <div class="cart-item-emoji">${item.emoji}</div>
+        <div class="cart-item-info">
+          <div class="cart-item-name">${item.name}</div>
+          <div class="cart-item-price">${formatPrice(item.price)} / unité</div>
+        </div>
+        <div class="cart-item-controls">
+          <button class="cart-qty-btn minus" onclick="removeFromCart('${item.id}');renderCart()">−</button>
+          <span class="cart-qty">${qty}</span>
+          <button class="cart-qty-btn plus" onclick="addToCart('${item.id}');renderCart()">+</button>
+        </div>
+        <div class="cart-item-subtotal">${formatPrice(item.price * qty)}</div>
+      </div>
+    `;
+  });
+
+  html += `
+    <div class="cart-summary">
+      <div class="cart-summary-row">
+        <span>${count} article${count > 1 ? 's' : ''}</span>
+        <span>${formatPrice(total)}</span>
+      </div>
+      <div class="cart-summary-row total">
+        <span>Total</span>
+        <span class="cart-total-amount">${formatPrice(total)}</span>
+      </div>
+    </div>
+  `;
+  el.innerHTML = html;
+}
+
+/* ============================================================
+   RENDU PAIEMENT (page 4)
+============================================================ */
+function renderPaymentRecap() {
+  const el = document.getElementById('payment-recap');
+  let totalHT = 0;
+  let totalTVA = 0;
+
+  let html = '<div class="order-recap">';
+  Object.values(cart).forEach(({ item, qty }) => {
+    const ttcLine = item.price * qty;
+    const tvaRate = item.tva || 10;
+    const htLine = Math.round(ttcLine / (1 + tvaRate / 100) * 100) / 100;
+    const tvaLine = Math.round((ttcLine - htLine) * 100) / 100;
+    totalHT += htLine;
+    totalTVA += tvaLine;
+    html += '<div class="order-recap-row">'
+      + '<span>' + qty + '× ' + item.name + '</span>'
+      + '<span>' + formatPrice(ttcLine) + '</span>'
+      + '</div>';
+  });
+
+  const totalTTC = totalHT + totalTVA;
+
+  html += '<hr class="order-recap-divider">';
+  html += '<div class="order-recap-row subtotal"><span>Sous-total HT</span><span>' + formatPrice(totalHT) + '</span></div>';
+  html += '<div class="order-recap-row"><span>TVA</span><span>' + formatPrice(totalTVA) + '</span></div>';
+  html += '<div class="order-recap-row subtotal"><span>Sous-total TTC</span><span>' + formatPrice(totalTTC) + '</span></div>';
+
+  if (selectedTip > 0) {
+    html += '<div class="order-recap-row"><span>Pourboire</span><span>' + formatPrice(selectedTip) + '</span></div>';
+  }
+
+  const grandTotal = totalTTC + selectedTip;
+  html += '<div class="order-recap-row total"><span>Total à payer</span><span>' + formatPrice(grandTotal) + '</span></div>';
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+/* Table selector */
+function initTableSelector() {
+  const container = document.getElementById('table-selector');
+  let html = '';
+  for (let i = 1; i <= 20; i++) {
+    html += `<button class="table-btn" onclick="selectTable(${i})" data-table="${i}">${i}</button>`;
+  }
+  container.innerHTML = html;
+}
+initTableSelector();
+
+function selectTable(num) {
+  selectedTable = num;
+  document.querySelectorAll('.table-btn').forEach(btn => {
+    btn.classList.toggle('selected', parseInt(btn.dataset.table) === num);
+  });
+  validatePaymentForm();
+}
+
+function selectPayment(method) {
+  selectedPaymentMethod = method;
+  document.querySelectorAll('.payment-method-card').forEach(card => {
+    card.classList.toggle('selected', card.dataset.method === method);
+  });
+  validatePaymentForm();
+}
+
+function validatePaymentForm() {
+  const email = document.getElementById('payment-email').value.trim();
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const btn = document.getElementById('pay-btn');
+  btn.disabled = !(emailValid && selectedPaymentMethod && selectedTable);
+
+  if (emailValid && selectedPaymentMethod && selectedTable) {
+    const isOnline = ['apple_pay', 'google_pay', 'card_online'].includes(selectedPaymentMethod);
+    btn.textContent = isOnline ? '💳 Payer ' + formatPrice(cartTotal()) : '✅ Confirmer la commande';
+  }
+}
+
+/* ============================================================
+   SOUMISSION DE COMMANDE
+============================================================ */
+async function submitOrder() {
+  const email = document.getElementById('payment-email').value.trim();
+  const isOnline = ['apple_pay', 'google_pay', 'card_online'].includes(selectedPaymentMethod);
+
+  // Générer un numéro de commande unique et immuable
+  const ts = Date.now().toString(36).toUpperCase();
+  const rnd = Math.random().toString(36).substring(2, 6).toUpperCase();
+  const orderNum = 'PL-' + ts + '-' + rnd;
+  currentOrderId = orderNum;
+
+  // Enregistrement de la commande dans Firestore
+  const order = {
+    id: orderNum,
+    timestamp: new Date().toISOString(),
+    items: Object.values(cart).map(({ item, qty }) => ({ name: item.name, qty, price: item.price, tva: item.tva || 10 })),
+    total: cartTotal() + selectedTip,
+    tip: selectedTip,
+    paymentMethod: selectedPaymentMethod,
+    paymentStatus: isOnline ? 'paid' : 'pending',
+    email,
+    table: selectedTable,
+    status: 'received'
+  };
+
+  // Enregistrer dans Firestore
+  const btn = document.getElementById('pay-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Enregistrement...';
+
+  try {
+    await db.collection('orders').add(order);
+    await logEvent(orderNum, 'order_created', `Commande créée pour ${email || 'client'}`);
+    showConfirmation(order);
+  } catch (err) {
+    console.error('Erreur Firestore:', err);
+    btn.disabled = false;
+    btn.textContent = isOnline ? '💳 Payer ' + formatPrice(cartTotal()) : '✅ Confirmer la commande';
+    showToast('❌ Erreur réseau. Veuillez réessayer.');
+  }
+}
+
+/* ============================================================
+   PAGE CONFIRMATION
+============================================================ */
+function showConfirmation(order) {
+  const isOnline = ['apple_pay', 'google_pay', 'card_online'].includes(order.paymentMethod);
+  const paymentLabels = {
+    apple_pay: ' Apple Pay',
+    google_pay: 'G Pay',
+    card_online: '💳 Carte en ligne',
+    card_counter: '🏧 Carte au comptoir',
+    cash: '💵 Espèces au comptoir'
+  };
+
+  document.getElementById('confirm-order-num').textContent = order.id;
+  document.getElementById('confirm-table-val').textContent = order.table;
+  document.getElementById('confirm-email-shown').textContent = order.email;
+  document.getElementById('confirm-subtitle').textContent =
+    isOnline
+      ? 'Votre paiement a été traité avec succès.'
+      : 'Votre commande est en préparation. Règlement au comptoir.';
+
+  const badge = document.getElementById('confirm-payment-badge');
+  badge.className = 'confirm-payment-badge ' + (isOnline ? 'online' : 'counter');
+  badge.textContent = paymentLabels[order.paymentMethod] || order.paymentMethod;
+
+  let recapHtml = `<div class="confirm-recap-title">Détail de la commande</div>`;
+  order.items.forEach(({ name, qty, price }) => {
+    recapHtml += `
+      <div class="confirm-recap-item">
+        <span class="confirm-recap-item-name">${qty}× ${name}</span>
+        <span class="confirm-recap-item-price">${formatPrice(price * qty)}</span>
+      </div>
+    `;
+  });
+  recapHtml += `
+    <div class="confirm-recap-item" style="font-weight:800;color:var(--primary)">
+      <span>Total</span>
+      <span>${formatPrice(order.total)}</span>
+    </div>
+  `;
+  document.getElementById('confirm-recap').innerHTML = recapHtml;
+
+  goTo('page-confirm');
+}
+
+function newOrder() {
+  cart = {};
+  selectedPaymentMethod = null;
+  selectedTable = null;
+  selectedTip = 0;
+  document.getElementById('payment-email').value = '';
+  document.querySelectorAll('.table-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.payment-method-card').forEach(c => c.classList.remove('selected'));
+  selectedPct = 0;
+  tipMode = 'pct';
+  document.getElementById('tip-free-amount').value = '';
+  document.getElementById('tip-none-btn').classList.add('active');
+  updateCartUI();
+  goTo('page-home');
+}
+
+/* ============================================================
+   UTILITAIRES
+============================================================ */
+function formatPrice(amount) {
+  return amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+/* ============================================================
+   INITIALISATION — Chargement menu depuis Firestore
+============================================================ */
+async function initApp() {
+  try {
+    const doc = await db.collection('config').doc('menu').get();
+    if (doc.exists) {
+      const data = doc.data();
+      // Fusionner : conserver les catégories locales si absentes dans Firestore
+      Object.keys(data).forEach(cat => {
+        if (MENU_DATA[cat]) MENU_DATA[cat] = data[cat];
+      });
+    }
+  } catch (e) {
+    console.warn('Menu Firestore non disponible, utilisation du menu local.');
+  }
+}
+initApp();
+
+/* ============================================================
+   HOOKS DE NAVIGATION (synchro des rendus)
+============================================================ */
+document.querySelectorAll('.page').forEach(p => {
+  const observer = new MutationObserver((muts) => {
+    for (const m of muts) {
+      if (m.target.classList.contains('active')) {
+        if (m.target.id === 'page-cart') renderCart();
+        if (m.target.id === 'page-payment') { initTipScroll(); renderPaymentRecap(); }
+      }
+    }
+  });
+  observer.observe(p, { attributes: true, attributeFilter: ['class'] });
+});
+</script>
+</body>
+</html>
