@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Écran Cuisine — Mon Restaurant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0D0D0F;
+      --surface: #18181B;
+      --surface2: #27272A;
+      --border: #3F3F46;
+      --text: #FAFAFA;
+      --muted: #A1A1AA;
+      --primary: #E8401C;
+      --success: #22C55E;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --info: #3B82F6;
+      --purple: #8B5CF6;
+      --timer-green: #22C55E;
+      --timer-orange: #F59E0B;
+      --timer-red: #EF4444;
+      --radius: 14px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    button { cursor: pointer; font-family: inherit; border: none; outline: none; }
+    input { font-family: inherit; outline: none; }
+
+    /* ============================================================
+       LOGIN
+    ============================================================ */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+    }
+    .login-icon { font-size: 48px; margin-bottom: 16px; }
+    .login-title { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+    .login-sub { font-size: 13px; color: var(--muted); margin-bottom: 32px; }
+    .login-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 6px; text-align: left; }
+    .login-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 15px;
+      margin-bottom: 12px;
+    }
+    .login-input:focus { border-color: var(--primary); }
+    .login-error { color: var(--danger); font-size: 13px; margin-bottom: 12px; display: none; }
+    .login-btn {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .login-btn:hover { opacity: 0.9; }
+    .login-hint { font-size: 11px; color: var(--muted); margin-top: 14px; }
+
+    /* ============================================================
+       MAIN KITCHEN DISPLAY
+    ============================================================ */
+    #kds-app { display: none; }
+
+    /* TOPBAR */
+    .kds-topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .kds-topbar-left { display: flex; align-items: center; gap: 20px; }
+    .kds-restaurant-name { font-size: 18px; font-weight: 900; color: var(--text); }
+    .kds-live { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--success); font-weight: 700; }
+    .kds-live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); animation: pulse 1.5s infinite; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .kds-clock { font-size: 15px; font-weight: 700; color: var(--muted); }
+
+    /* TABS */
+    .kds-tabs { display: flex; gap: 4px; }
+    .kds-tab {
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--muted);
+      background: transparent;
+      transition: all 0.2s;
+    }
+    .kds-tab.active { background: var(--primary); color: white; }
+    .kds-tab:hover:not(.active) { background: var(--surface2); color: var(--text); }
+
+    .kds-topbar-right { display: flex; align-items: center; gap: 14px; }
+    .kds-filter-select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .kds-logout { font-size: 13px; color: var(--muted); cursor: pointer; padding: 6px 12px; border-radius: 8px; }
+    .kds-logout:hover { background: var(--surface2); color: var(--text); }
+
+    /* STATS BAR */
+    .kds-stats-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 24px;
+      display: flex;
+      gap: 24px;
+      overflow-x: auto;
+    }
+    .kds-stat {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .kds-stat-label { font-size: 12px; color: var(--muted); }
+    .kds-stat-val { font-size: 15px; font-weight: 800; }
+    .kds-stat-val.green { color: var(--success); }
+    .kds-stat-val.orange { color: var(--warning); }
+    .kds-stat-val.red { color: var(--danger); }
+    .kds-stat-val.blue { color: var(--info); }
+
+    /* ORDERS GRID */
+    .kds-main { padding: 20px 20px 100px; }
+    .kds-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 400px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .kds-empty-icon { font-size: 72px; margin-bottom: 20px; opacity: 0.4; }
+    .kds-empty-text { font-size: 20px; font-weight: 700; opacity: 0.5; }
+
+    .orders-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    /* ORDER CARD */
+    .order-card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: all 0.3s;
+      position: relative;
+    }
+    .order-card.status-received { border-color: var(--info); }
+    .order-card.status-preparing { border-color: var(--warning); }
+    .order-card.status-ready { border-color: #F97316; }
+    .order-card.status-awaiting-payment { border-color: var(--danger); }
+    .order-card.status-cancelled { border-color: #DC2626; opacity: 0.6; }
+    .order-card.status-cancelled .order-num { text-decoration: line-through; color: #DC2626; }
+
+    /* Card Header */
+    .order-card-header {
+      padding: 14px 16px 12px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .order-num { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
+    .order-time { font-size: 12px; color: var(--muted); margin-top: 2px; font-weight: 600; }
+    .order-timer {
+      font-size: 20px;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0px;
+    }
+    .order-timer.green { color: var(--timer-green); }
+    .order-timer.orange { color: var(--timer-orange); }
+    .order-timer.red { color: var(--timer-red); animation: blink 1s infinite; }
+    @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+    /* Payment badges */
+    .payment-row {
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+    }
+    .payment-badge {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .payment-badge.online { background: rgba(34,197,94,0.15); color: #22C55E; }
+    .payment-badge.counter { background: rgba(245,158,11,0.15); color: #F59E0B; }
+    .payment-status-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .payment-status-badge.paid { background: rgba(34,197,94,0.15); color: #22C55E; }
+    .payment-status-badge.pending { background: rgba(239,68,68,0.15); color: #EF4444; }
+
+    /* Items list */
+    .order-items {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .order-item-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 4px 0;
+    }
+    .order-item-qty { color: var(--primary); font-weight: 800; margin-right: 6px; }
+    .order-total-row {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 10px;
+      margin-top: 6px;
+      border-top: 1px solid var(--border);
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--muted);
+    }
+
+    /* Status buttons */
+    .order-actions {
+      padding: 12px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .status-btn {
+      flex: 1;
+      min-width: 100px;
+      padding: 10px 8px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      transition: all 0.2s;
+      text-align: center;
+      opacity: 0.4;
+    }
+    .status-btn.active-btn { opacity: 1; }
+    .status-btn.current-status { opacity: 1; outline: 2px solid white; outline-offset: 2px; }
+    .btn-received { background: rgba(59,130,246,0.2); color: #60A5FA; }
+    .btn-received.active-btn:hover { background: rgba(59,130,246,0.4); }
+    .btn-preparing { background: rgba(245,158,11,0.2); color: #FCD34D; }
+    .btn-preparing.active-btn:hover { background: rgba(245,158,11,0.4); }
+    .btn-ready { background: rgba(249,115,22,0.2); color: #FB923C; }
+    .btn-ready.active-btn:hover { background: rgba(249,115,22,0.4); }
+    .btn-served { background: rgba(34,197,94,0.2); color: #4ADE80; }
+    .btn-served.active-btn:hover { background: rgba(34,197,94,0.4); }
+
+    /* Awaiting payment banner */
+    .awaiting-payment-banner {
+      background: rgba(239,68,68,0.12);
+      border-top: 2px solid var(--danger);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .awaiting-banner-text {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--danger);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mark-paid-btn {
+      background: var(--danger);
+      color: white;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .mark-paid-btn:hover { opacity: 0.85; }
+
+    /* HISTORY TAB */
+    .history-section { padding: 20px; }
+    .history-stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .history-stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .history-stat-label { font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .history-stat-val { font-size: 24px; font-weight: 900; }
+    .history-orders-list { display: flex; flex-direction: column; gap: 10px; }
+    .history-order-row {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .history-order-id { font-size: 18px; font-weight: 900; min-width: 60px; }
+    .history-order-info { flex: 1; font-size: 14px; color: var(--muted); }
+    .history-order-total { font-size: 16px; font-weight: 800; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-icon">👨‍🍳</div>
+    <h1 class="login-title">Écran Cuisine</h1>
+    <p class="login-sub">Mon Restaurant — Accès cuisine</p>
+    <label class="login-label">Identifiant</label>
+    <input type="text" class="login-input" id="login-user" placeholder="cuisine" autocomplete="off" />
+    <label class="login-label">Mot de passe</label>
+    <input type="password" class="login-input" id="login-pass" placeholder="••••••••"
+      autocomplete="new-password" onkeydown="if(event.key==='Enter')tryLogin()" />
+    <div class="login-error" id="login-error">Identifiant ou mot de passe incorrect.</div>
+    <button class="login-btn" onclick="tryLogin()">Accéder à la cuisine →</button>
+    <p class="login-hint">Accès réservé au personnel cuisine</p>
+  </div>
+</div>
+
+<!-- KDS APP -->
+<div id="kds-app">
+
+  <!-- TOPBAR -->
+  <div class="kds-topbar">
+    <div class="kds-topbar-left">
+      <span class="kds-restaurant-name">🍽️ Mon Restaurant</span>
+      <div class="kds-live"><div class="kds-live-dot"></div>LIVE</div>
+      <span class="kds-clock" id="kds-clock"></span>
+    </div>
+    <div class="kds-tabs">
+      <button class="kds-tab active" onclick="switchKdsTab('active',this)">En cours</button>
+      <button class="kds-tab" onclick="switchKdsTab('history',this)">Historique du jour</button>
+    </div>
+    <div class="kds-topbar-right">
+      <select class="kds-filter-select" id="status-filter" onchange="renderActiveOrders()">
+        <option value="all">Toutes</option>
+        <option value="received">Reçues</option>
+        <option value="preparing">En préparation</option>
+        <option value="ready">Prêtes</option>
+      </select>
+      <span class="kds-logout" onclick="logout()">⎋ Quitter</span>
+    </div>
+  </div>
+
+  <!-- STATS BAR -->
+  <div class="kds-stats-bar" id="kds-stats-bar"></div>
+
+  <!-- MAIN CONTENT -->
+  <div class="kds-main">
+    <!-- Active orders -->
+    <div id="tab-active">
+      <div class="orders-grid" id="orders-grid"></div>
+    </div>
+    <!-- History -->
+    <div id="tab-history" style="display:none">
+      <div class="history-section" id="history-section"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCK0G7cJ3NnA3sP-GPb08MdfwwPVSmx2Wg",
+    authDomain: "mon-restaurant-29980.firebaseapp.com",
+    projectId: "mon-restaurant-29980",
+    storageBucket: "mon-restaurant-29980.firebasestorage.app",
+    messagingSenderId: "78241830692",
+    appId: "1:78241830692:web:09bf6f6606147f5d3cc5b1"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+
+<script>
+/* ============================================================
+   AUTH — Firestore users collection
+============================================================ */
+let currentUser = null; // { name, username, role }
+
+async function tryLogin() {
+  setTimeout(async () => {
+    const u = document.getElementById('login-user').value.trim();
+    const p = document.getElementById('login-pass').value;
+    document.getElementById('login-error').style.display = 'none';
+
+    try {
+      const snap = await db.collection('users').where('username', '==', u).get();
+      if (!snap.empty) {
+        const user = snap.docs[0].data();
+        if (user.password === p && user.role === 'cuisine') {
+          currentUser = { name: user.name, username: user.username, role: user.role, _docId: snap.docs[0].id };
+          await db.collection('users').doc(snap.docs[0].id).update({ lastLogin: new Date().toISOString() });
+          await logEvent(null, 'login', currentUser.name + ' s\'est connecté(e) (cuisine)');
+          document.getElementById('login-screen').style.display = 'none';
+          document.getElementById('kds-app').style.display = 'block';
+          initKDS();
+          return;
+        } else if (user.password === p && user.role !== 'cuisine') {
+          document.getElementById('login-error').textContent = 'Ce compte n\'a pas accès à la cuisine';
+          document.getElementById('login-error').style.display = 'block';
+          return;
+        }
+      }
+      // Fallback: default cuisine credentials (before profiles exist)
+      if (u === 'cuisine' && p === 'cuisine1234') {
+        currentUser = { name: 'Cuisine', username: 'cuisine', role: 'cuisine', _docId: null };
+        await logEvent(null, 'login', 'Cuisine s\'est connecté(e) (compte par défaut)');
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('kds-app').style.display = 'block';
+        initKDS();
+        return;
+      }
+      document.getElementById('login-error').textContent = 'Identifiant ou mot de passe incorrect';
+      document.getElementById('login-error').style.display = 'block';
+    } catch(e) {
+      // Firestore offline? fallback
+      if (u === 'cuisine' && p === 'cuisine1234') {
+        currentUser = { name: 'Cuisine', username: 'cuisine', role: 'cuisine', _docId: null };
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('kds-app').style.display = 'block';
+        initKDS();
+      } else {
+        document.getElementById('login-error').textContent = 'Erreur de connexion';
+        document.getElementById('login-error').style.display = 'block';
+      }
+    }
+  }, 0);
+}
+
+async function logEvent(orderId, eventType, details) {
+  const logEntry = {
+    orderId: orderId || '',
+    eventType,
+    details,
+    timestamp: new Date().toISOString(),
+    user: currentUser ? currentUser.name : 'Cuisine'
+  };
+  try {
+    await db.collection('audit_log').add(logEntry);
+  } catch (e) {
+    console.error('Erreur log audit:', e);
+  }
+}
+
+function logout() {
+  if (currentUser) {
+    logEvent(null, 'logout', (currentUser ? currentUser.name : 'Cuisine') + ' s\'est déconnecté(e)');
+  }
+  currentUser = null;
+  if (ordersUnsubscribe) { ordersUnsubscribe(); ordersUnsubscribe = null; }
+  allOrders = [];
+  document.getElementById('kds-app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+  if (clockTimer) clearInterval(clockTimer);
+}
+
+/* ============================================================
+   KDS INIT — Firestore temps réel
+============================================================ */
+let ordersUnsubscribe = null;
+let allOrders = [];
+let clockTimer = null;
+let currentTab = 'active';
+
+function initKDS() {
+  updateClock();
+  clockTimer = setInterval(updateClock, 1000);
+
+  // Listener Firestore temps réel
+  ordersUnsubscribe = db.collection('orders').onSnapshot(snapshot => {
+    allOrders = snapshot.docs.map(doc => ({ ...doc.data(), _docId: doc.id }));
+    allOrders.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    if (currentTab === 'active') { renderActiveOrders(); updateStatsBar(); }
+    else if (currentTab === 'history') renderHistory();
+  }, err => {
+    console.error('Erreur Firestore cuisine:', err);
+  });
+}
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById('kds-clock').textContent =
+    now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+function switchKdsTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.kds-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-active').style.display = tab === 'active' ? 'block' : 'none';
+  document.getElementById('tab-history').style.display = tab === 'history' ? 'block' : 'none';
+  if (tab === 'history') renderHistory();
+  if (tab === 'active') renderActiveOrders();
+}
+
+/* ============================================================
+   DONNÉES — Firestore
+============================================================ */
+function getOrders() {
+  return allOrders;
+}
+
+async function updateOrder(orderId, changes) {
+  const order = allOrders.find(o => o.id === orderId);
+  if (!order) return;
+  if (changes.status === 'served') changes.servedAt = new Date().toISOString();
+  await db.collection('orders').doc(order._docId).update(changes);
+}
+
+/* ============================================================
+   STATS BAR
+============================================================ */
+function updateStatsBar() {
+  const orders = getOrders();
+  const active = orders.filter(o => ['received','preparing','ready'].includes(o.status));
+  const received = active.filter(o => o.status === 'received').length;
+  const preparing = active.filter(o => o.status === 'preparing').length;
+  const ready = active.filter(o => o.status === 'ready').length;
+  const awaitingPayment = orders.filter(o => o.status === 'served' && o.paymentStatus === 'pending').length;
+
+  document.getElementById('kds-stats-bar').innerHTML = `
+    <div class="kds-stat"><span class="kds-stat-label">Total en cours</span><span class="kds-stat-val blue">${active.length}</span></div>
+    <div class="kds-stat"><span class="kds-stat-label">Reçues</span><span class="kds-stat-val blue">${received}</span></div>
+    <div class="kds-stat"><span class="kds-stat-label">En préparation</span><span class="kds-stat-val orange">${preparing}</span></div>
+    <div class="kds-stat"><span class="kds-stat-label">Prêtes</span><span class="kds-stat-val orange">${ready}</span></div>
+    ${awaitingPayment > 0 ? `<div class="kds-stat"><span class="kds-stat-label">⚠️ Paiement en attente</span><span class="kds-stat-val red">${awaitingPayment}</span></div>` : ''}
+  `;
+}
+
+/* ============================================================
+   MINUTEUR
+============================================================ */
+function getElapsedSeconds(timestamp) {
+  return Math.floor((Date.now() - new Date(timestamp).getTime()) / 1000);
+}
+
+function formatTimer(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  if (h > 0) return `${pad(h)}:${pad(m)}:${pad(s)}`;
+  return `${pad(m)}:${pad(s)}`;
+}
+
+function pad(n) { return n.toString().padStart(2, '0'); }
+
+function timerClass(seconds) {
+  if (seconds < 600) return 'green';
+  if (seconds < 1200) return 'orange';
+  return 'red';
+}
+
+/* ============================================================
+   ACTIVE ORDERS
+============================================================ */
+function renderActiveOrders() {
+  const orders = getOrders();
+  const filter = document.getElementById('status-filter').value;
+
+  // Commandes en cours + celles servies en attente de paiement
+  let active = orders.filter(o =>
+    ['received','preparing','ready'].includes(o.status) ||
+    (o.status === 'served' && o.paymentStatus === 'pending')
+  );
+
+  // Filtre de statut
+  if (filter !== 'all') {
+    active = active.filter(o => o.status === filter);
+  }
+
+  // Tri : plus ancienne en haut à gauche
+  active.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+  const grid = document.getElementById('orders-grid');
+
+  if (active.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column:1/-1">
+        <div class="kds-empty">
+          <div class="kds-empty-icon">✅</div>
+          <div class="kds-empty-text">Aucune commande en cours</div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const pmLabels = {
+    apple_pay: ' Apple Pay ✅',
+    google_pay: 'G Pay ✅',
+    card_online: '💳 Carte en ligne ✅',
+    card_counter: '💳 CB au comptoir',
+    cash: '💵 Espèces au comptoir'
+  };
+  const pmOnline = ['apple_pay','google_pay','card_online'];
+
+  grid.innerHTML = active.map(order => {
+    const elapsed = getElapsedSeconds(order.timestamp);
+    const tClass = timerClass(elapsed);
+    const isOnline = pmOnline.includes(order.paymentMethod);
+    const isAwaiting = order.status === 'served' && order.paymentStatus === 'pending';
+
+    const statusClass = isAwaiting ? 'status-awaiting-payment' : 'status-' + order.status;
+    const orderTime = new Date(order.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    const total = (order.items||[]).reduce((s,i) => s + i.price * i.qty, 0);
+
+    const itemsHtml = (order.items||[]).map(item =>
+      `<div class="order-item-row">
+        <span><span class="order-item-qty">${item.qty}×</span> ${item.name}</span>
+        <span style="color:var(--muted);font-size:13px">${fmt(item.price * item.qty)}</span>
+      </div>`
+    ).join('');
+
+    const statusButtons = isAwaiting || order.status === 'cancelled' ? '' : `
+      <div class="order-actions">
+        <button class="status-btn btn-received ${order.status==='received'?'current-status':'active-btn'}"
+          onclick="setStatus('${order.id}','received')">🔵 Reçue</button>
+        <button class="status-btn btn-preparing ${order.status==='preparing'?'current-status':'active-btn'}"
+          onclick="setStatus('${order.id}','preparing')">🟡 En prépa</button>
+        <button class="status-btn btn-ready ${order.status==='ready'?'current-status':'active-btn'}"
+          onclick="setStatus('${order.id}','ready')">🟠 Prête</button>
+        <button class="status-btn btn-served active-btn"
+          onclick="markServed('${order.id}')">✅ Servie</button>
+        ${order.status !== 'served' && order.status !== 'cancelled' && !(isOnline && order.paymentStatus === 'paid') ? `<button style="background:rgba(220,38,38,0.2);color:#EF4444;padding:10px 8px;border-radius:8px;font-size:13px;font-weight:700;margin-top:4px;width:100%" onclick="cancelOrderKDS('${order.id}')">🚫 Annuler</button>` : ''}
+      </div>
+    `;
+
+    const awaitingBanner = isAwaiting ? `
+      <div class="awaiting-payment-banner">
+        <div class="awaiting-banner-text">⚠️ PAIEMENT À ENCAISSER</div>
+        <button class="mark-paid-btn" onclick="markPaid('${order.id}')">💰 Marquer comme payée</button>
+      </div>
+    ` : '';
+
+    return `
+      <div class="order-card ${statusClass}" id="order-card-${order.id}">
+        <div class="order-card-header">
+          <div>
+            <div class="order-num">${order.id}</div>
+            ${order.table ? `<div style="font-size:14px;font-weight:700;color:#6366F1;margin-top:2px">🚑 Table ${order.table}</div>` : ''}
+            <div class="order-time">⏱ Reçue à ${orderTime}</div>
+          </div>
+          <div class="order-timer ${tClass}" id="timer-${order.id}" data-ts="${order.timestamp}">
+            ${formatTimer(elapsed)}
+          </div>
+        </div>
+        <div class="payment-row">
+          <span class="payment-badge ${isOnline?'online':'counter'}">${pmLabels[order.paymentMethod]||order.paymentMethod}</span>
+          <span class="payment-status-badge ${isOnline||order.paymentStatus==='paid'?'paid':'pending'}">
+            ${isOnline||order.paymentStatus==='paid'?'PAYÉ':'EN ATTENTE D\'ENCAISSEMENT'}
+          </span>
+        </div>
+        <div class="order-items">
+          ${itemsHtml}
+          <div class="order-total-row">
+            <span>Total</span>
+            <span>${fmt(total)}</span>
+          </div>
+        </div>
+        ${statusButtons}
+        ${awaitingBanner}
+      </div>
+    `;
+  }).join('');
+
+  // Start live timers
+  startTimers();
+}
+
+/* ============================================================
+   LIVE TIMERS
+============================================================ */
+let timerInterval = null;
+
+function startTimers() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    document.querySelectorAll('[data-ts]').forEach(el => {
+      const elapsed = getElapsedSeconds(el.dataset.ts);
+      el.textContent = formatTimer(elapsed);
+      el.className = 'order-timer ' + timerClass(elapsed);
+    });
+  }, 1000);
+}
+
+/* ============================================================
+   ACTIONS CUISINE
+============================================================ */
+async function setStatus(orderId, status) {
+  await updateOrder(orderId, { status });
+  const userName = currentUser ? currentUser.name : 'Cuisine';
+  const statusLabels = { received: 'reçue', preparing: 'en préparation', ready: 'prête' };
+  const label = statusLabels[status] || status;
+  await logEvent(orderId, 'status_change', 'Commande ' + orderId + ' marquée ' + label + ' par ' + userName);
+}
+
+async function markServed(orderId) {
+  const order = allOrders.find(o => o.id === orderId);
+  if (!order) return;
+
+  const isOnline = ['apple_pay','google_pay','card_online'].includes(order.paymentMethod);
+  const userName = currentUser ? currentUser.name : 'Cuisine';
+
+  if (isOnline) {
+    animateRemove(orderId, async () => {
+      await updateOrder(orderId, { status: 'served' });
+      await logEvent(orderId, 'served', 'Commande ' + orderId + ' servie par ' + userName);
+    });
+  } else {
+    await updateOrder(orderId, { status: 'served' });
+    await logEvent(orderId, 'served', 'Commande ' + orderId + ' servie par ' + userName);
+  }
+}
+
+async function markPaid(orderId) {
+  const userName = currentUser ? currentUser.name : 'Cuisine';
+  animateRemove(orderId, async () => {
+    await updateOrder(orderId, { paymentStatus: 'paid' });
+    await logEvent(orderId, 'payment', 'Commande ' + orderId + ' marquée payée par ' + userName);
+  });
+}
+
+async function cancelOrderKDS(orderId) {
+  const order = allOrders.find(o => o.id === orderId);
+  if (!order) return;
+  const pmOnlineCheck = ['apple_pay','google_pay','card_online'];
+  if (pmOnlineCheck.includes(order.paymentMethod) && order.paymentStatus === 'paid') {
+    alert('Impossible d\'annuler une commande déjà payée en ligne.');
+    return;
+  }
+  if (!confirm('Annuler cette commande ?')) return;
+  const userName = currentUser ? currentUser.name : 'Cuisine';
+  animateRemove(orderId, async () => {
+    await updateOrder(orderId, { status: 'cancelled' });
+    await logEvent(orderId, 'cancelled', 'Commande ' + orderId + ' annulée par ' + userName);
+  });
+}
+
+function animateRemove(orderId, callback) {
+  const card = document.getElementById('order-card-' + orderId);
+  if (card) {
+    card.style.transition = 'all 0.4s ease';
+    card.style.opacity = '0';
+    card.style.transform = 'scale(0.9)';
+    setTimeout(callback, 400);
+  } else {
+    callback();
+  }
+}
+
+/* ============================================================
+   HISTORIQUE DU JOUR
+============================================================ */
+function renderHistory() {
+  const orders = getOrders();
+  const today = new Date().toDateString();
+  const todayServed = orders.filter(o =>
+    (o.status === 'served' || o.status === 'cancelled') && new Date(o.timestamp).toDateString() === today
+  );
+
+  const totalOnline = todayServed
+    .filter(o => ['apple_pay','google_pay','card_online'].includes(o.paymentMethod))
+    .reduce((s,o) => s + o.total, 0);
+  const totalEncaisse = todayServed
+    .filter(o => !['apple_pay','google_pay','card_online'].includes(o.paymentMethod) && o.paymentStatus === 'paid')
+    .reduce((s,o) => s + o.total, 0);
+  const totalPending = todayServed
+    .filter(o => o.paymentStatus === 'pending')
+    .reduce((s,o) => s + o.total, 0);
+  const totalCA = totalOnline + totalEncaisse;
+
+  const pmLabels = {
+    apple_pay:'  Apple Pay ✅', google_pay:'G Pay ✅', card_online:'💳 Carte en ligne ✅',
+    card_counter:'🏧 CB comptoir', cash:'💵 Espèces'
+  };
+
+  const ordersHtml = todayServed.length === 0
+    ? '<p style="color:var(--muted);text-align:center;padding:32px">Aucune commande servie aujourd\'hui</p>'
+    : todayServed.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map(o => {
+        const time = new Date(o.timestamp).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+        const isOnline = ['apple_pay','google_pay','card_online'].includes(o.paymentMethod);
+        const items = (o.items||[]).map(i => `${i.qty}× ${i.name}`).join(', ');
+        return `
+          <div class="history-order-row">
+            <div class="history-order-id">${o.id}</div>
+            <div class="history-order-info">
+              <div style="color:var(--text);font-weight:600;margin-bottom:4px">${items}</div>
+              <div>${pmLabels[o.paymentMethod]||o.paymentMethod} · ${time}</div>
+            </div>
+            <div class="history-order-total">${fmt(o.total)}</div>
+            <div>
+              ${isOnline||o.paymentStatus==='paid'
+                ? '<span style="background:rgba(34,197,94,0.15);color:#22C55E;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">✅ PAYÉ</span>'
+                : '<span style="background:rgba(239,68,68,0.15);color:#EF4444;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">⚠️ EN ATTENTE</span>'
+              }
+            </div>
+          </div>
+        `;
+      }).join('');
+
+  document.getElementById('history-section').innerHTML = `
+    <div class="history-stats-row">
+      <div class="history-stat-card">
+        <div class="history-stat-label">CA Total encaissé</div>
+        <div class="history-stat-val" style="color:var(--success)">${fmt(totalCA)}</div>
+      </div>
+      <div class="history-stat-card">
+        <div class="history-stat-label">En ligne</div>
+        <div class="history-stat-val" style="color:var(--info)">${fmt(totalOnline)}</div>
+      </div>
+      <div class="history-stat-card">
+        <div class="history-stat-label">Au comptoir (encaissé)</div>
+        <div class="history-stat-val" style="color:var(--warning)">${fmt(totalEncaisse)}</div>
+      </div>
+      ${totalPending > 0 ? `
+        <div class="history-stat-card">
+          <div class="history-stat-label">⚠️ En attente encaissement</div>
+          <div class="history-stat-val" style="color:var(--danger)">${fmt(totalPending)}</div>
+        </div>
+      ` : ''}
+    </div>
+    <div class="history-orders-list">${ordersHtml}</div>
+  `;
+}
+
+/* ============================================================
+   UTILITAIRES
+============================================================ */
+function fmt(amount) {
+  return amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+}
+</script>
+</body>
+</html>
