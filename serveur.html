@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Espace Serveur — Mon Restaurant</title>
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#6366F1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #F8FAFC;
+      --surface: #FFFFFF;
+      --surface2: #F1F5F9;
+      --border: #E2E8F0;
+      --text: #0F172A;
+      --muted: #64748B;
+      --primary: #6366F1;
+      --primary-light: #EEF2FF;
+      --success: #22C55E;
+      --success-light: #F0FDF4;
+      --warning: #F59E0B;
+      --warning-light: #FFFBEB;
+      --danger: #EF4444;
+      --danger-light: #FEF2F2;
+      --info: #3B82F6;
+      --info-light: #EFF6FF;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button { cursor: pointer; font-family: inherit; border: none; outline: none; }
+    input { font-family: inherit; outline: none; }
+
+    /* ============================================================
+       LOGIN
+    ============================================================ */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+    }
+    .login-card {
+      background: white;
+      border-radius: 24px;
+      padding: 40px 28px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    .login-icon { font-size: 48px; margin-bottom: 12px; }
+    .login-title { font-size: 22px; font-weight: 800; margin-bottom: 4px; color: var(--text); }
+    .login-sub { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+    .login-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 6px; text-align: left; }
+    .login-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--surface2);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 15px;
+      margin-bottom: 12px;
+    }
+    .login-input:focus { border-color: var(--primary); }
+    .login-error { color: var(--danger); font-size: 13px; margin-bottom: 12px; display: none; }
+    .login-btn {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .login-hint { font-size: 11px; color: var(--muted); margin-top: 14px; }
+    .install-guide {
+      margin-top: 24px;
+      text-align: left;
+      background: var(--surface2);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .install-guide-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .install-guide-section { margin-bottom: 12px; }
+    .install-guide-section:last-child { margin-bottom: 0; }
+    .install-guide-os {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+    .install-guide-steps {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .install-guide-steps strong { color: var(--text); font-weight: 600; }
+
+    /* ============================================================
+       APP SHELL
+    ============================================================ */
+    #server-app { display: none; }
+
+    .topbar {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 0 16px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .topbar-title { font-size: 16px; font-weight: 800; }
+    .topbar-live { font-size: 11px; font-weight: 700; color: var(--success); display: flex; align-items: center; gap: 4px; }
+    .topbar-live::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--success); animation: livePulse 2s infinite; }
+    @keyframes livePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .btn-logout {
+      background: var(--surface2);
+      color: var(--muted);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .btn-mute {
+      background: var(--surface2);
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* STATS BAR */
+    .stats-bar {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .stat-chip {
+      flex-shrink: 0;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .stat-chip-icon { font-size: 18px; }
+    .stat-chip-val { font-size: 20px; font-weight: 800; }
+    .stat-chip-label { font-size: 11px; color: var(--muted); font-weight: 600; }
+    .stat-chip-val.blue { color: var(--info); }
+    .stat-chip-val.orange { color: var(--warning); }
+    .stat-chip-val.green { color: var(--success); }
+    .stat-chip-val.red { color: var(--danger); }
+
+    /* TABS */
+    .view-tabs {
+      display: flex;
+      padding: 0 16px;
+      gap: 0;
+      border-bottom: 2px solid var(--border);
+    }
+    .view-tab {
+      flex: 1;
+      padding: 12px 8px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      background: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+    .view-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    /* ORDERS LIST */
+    .orders-container { padding: 12px 16px 100px; }
+
+    .table-group { margin-bottom: 16px; }
+    .table-group-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      padding: 6px 0;
+    }
+    .table-group-badge {
+      background: var(--primary);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .table-group-count {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .order-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 10px;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .order-card.status-received { border-left-color: var(--info); }
+    .order-card.status-preparing { border-left-color: var(--warning); }
+    .order-card.status-ready { border-left-color: var(--success); background: var(--success-light); }
+    .order-card.status-served { border-left-color: var(--muted); opacity: 0.6; }
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .order-id { font-size: 12px; font-weight: 700; color: var(--muted); }
+    .order-time { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .order-timer {
+      font-size: 13px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+    .order-timer.green { background: var(--success-light); color: var(--success); }
+    .order-timer.orange { background: var(--warning-light); color: var(--warning); }
+    .order-timer.red { background: var(--danger-light); color: var(--danger); }
+
+    .order-status-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .badge-received { background: var(--info-light); color: var(--info); }
+    .badge-preparing { background: var(--warning-light); color: var(--warning); }
+    .badge-ready { background: var(--success-light); color: var(--success); }
+
+    .order-items-list { margin-bottom: 8px; }
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 2px 0;
+    }
+    .order-item-qty { font-weight: 800; color: var(--primary); }
+    .order-item-name { color: var(--text); }
+    .order-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 800;
+      padding-top: 6px;
+      border-top: 1px dashed var(--border);
+      margin-top: 4px;
+    }
+    .order-payment {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .order-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .action-btn {
+      flex: 1;
+      padding: 10px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .btn-mark-served { background: var(--success); color: white; }
+    .btn-mark-served:active { transform: scale(0.96); }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-state-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state-text { font-size: 15px; font-weight: 600; }
+
+    /* NOTIFICATION TOAST */
+    .toast-container {
+      position: fixed;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 999;
+      width: 90%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .toast {
+      background: white;
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+      animation: toastIn 0.4s ease;
+      pointer-events: auto;
+      border-left: 4px solid var(--info);
+    }
+    .toast.toast-ready { border-left-color: var(--success); }
+    .toast-icon { font-size: 24px; flex-shrink: 0; }
+    .toast-text { font-size: 13px; font-weight: 600; color: var(--text); }
+    .toast-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .toast.leaving { animation: toastOut 0.3s ease forwards; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(-20px); } }
+
+    /* NOTIFICATION PULSE on topbar */
+    .notif-pulse {
+      animation: notifBounce 0.6s ease;
+    }
+    @keyframes notifBounce { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+
+    /* FULL-SCREEN FLASH for urgent notifications */
+    .flash-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0;
+    }
+    .flash-overlay.flash-new {
+      animation: flashNew 2s ease;
+    }
+    .flash-overlay.flash-ready {
+      animation: flashReady 2.5s ease;
+    }
+    @keyframes flashNew {
+      0% { opacity: 0; background: var(--info); }
+      8% { opacity: 0.35; }
+      16% { opacity: 0; }
+      24% { opacity: 0.3; }
+      32% { opacity: 0; }
+      40% { opacity: 0.2; }
+      100% { opacity: 0; }
+    }
+    @keyframes flashReady {
+      0% { opacity: 0; background: var(--success); }
+      6% { opacity: 0.4; }
+      12% { opacity: 0; }
+      18% { opacity: 0.35; }
+      24% { opacity: 0; }
+      30% { opacity: 0.3; }
+      36% { opacity: 0; }
+      42% { opacity: 0.2; }
+      100% { opacity: 0; }
+    }
+
+    /* Persistent banner for ready orders */
+    .ready-banner {
+      display: none;
+      background: var(--success);
+      color: white;
+      text-align: center;
+      padding: 10px;
+      font-size: 14px;
+      font-weight: 800;
+      animation: readyBannerPulse 1.5s infinite;
+      cursor: pointer;
+    }
+    .ready-banner.visible { display: block; }
+    @keyframes readyBannerPulse {
+      0%,100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ======================== LOGIN ======================== -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-icon">🍽️</div>
+    <div class="login-title">Espace Serveur</div>
+    <div class="login-sub">Suivez vos commandes en temps réel</div>
+    <label class="login-label">Identifiant</label>
+    <input class="login-input" id="login-user" type="text" placeholder="serveur" autocomplete="username" />
+    <label class="login-label">Mot de passe</label>
+    <input class="login-input" id="login-pass" type="password" placeholder="••••••" autocomplete="current-password"
+      onkeydown="if(event.key==='Enter')tryLogin()" />
+    <div class="login-error" id="login-error">Identifiant ou mot de passe incorrect</div>
+    <button class="login-btn" onclick="tryLogin()">Se connecter</button>
+    <div class="login-hint">Identifiants fournis par le gérant</div>
+
+    <div class="install-guide">
+      <div class="install-guide-title">📲 Installer l'application</div>
+      <div class="install-guide-section">
+        <div class="install-guide-os">🍎 iPhone / iPad (Safari)</div>
+        <div class="install-guide-steps">
+          1. Ouvrir cette page dans <strong>Safari</strong><br>
+          2. Appuyer sur <strong>Partager</strong> (icône ↑)<br>
+          3. Choisir <strong>« Sur l'écran d'accueil »</strong><br>
+          4. Appuyer sur <strong>Ajouter</strong>
+        </div>
+      </div>
+      <div class="install-guide-section">
+        <div class="install-guide-os">🤖 Android (Chrome)</div>
+        <div class="install-guide-steps">
+          1. Ouvrir cette page dans <strong>Chrome</strong><br>
+          2. Appuyer sur <strong>⋮</strong> (menu en haut à droite)<br>
+          3. Choisir <strong>« Installer l'application »</strong><br>
+          4. Confirmer l'installation
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== APP ======================== -->
+<div id="server-app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title">🍽️ Service</div>
+      <div class="topbar-live">LIVE</div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-mute" id="btn-mute" onclick="toggleMute()" title="Couper/remettre le son">🔔</button>
+      <button class="btn-logout" onclick="logout()">Déconnexion</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar" id="stats-bar"></div>
+
+  <!-- TABS -->
+  <div class="view-tabs">
+    <button class="view-tab active" onclick="switchView('table', this)">Par table</button>
+    <button class="view-tab" onclick="switchView('status', this)">Par statut</button>
+    <button class="view-tab" onclick="switchView('all', this)">Tout</button>
+  </div>
+
+  <!-- ORDERS -->
+  <div class="orders-container" id="orders-container"></div>
+
+  <!-- READY BANNER (persistent until dismissed) -->
+  <div class="ready-banner" id="ready-banner" onclick="dismissReadyBanner()">🔔 COMMANDE PRÊTE — APPUYEZ ICI</div>
+
+  <!-- TOAST NOTIFICATIONS -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- FLASH OVERLAY -->
+  <div class="flash-overlay" id="flash-overlay"></div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCK0G7cJ3NnA3sP-GPb08MdfwwPVSmx2Wg",
+    authDomain: "mon-restaurant-29980.firebaseapp.com",
+    projectId: "mon-restaurant-29980",
+    storageBucket: "mon-restaurant-29980.firebasestorage.app",
+    messagingSenderId: "78241830692",
+    appId: "1:78241830692:web:09bf6f6606147f5d3cc5b1"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+
+<script>
+/* ============================================================
+   AUTH — Firestore users collection
+============================================================ */
+let currentUser = null; // { name, username, role }
+
+async function tryLogin() {
+  setTimeout(async () => {
+    const u = document.getElementById('login-user').value.trim();
+    const p = document.getElementById('login-pass').value;
+    document.getElementById('login-error').style.display = 'none';
+
+    try {
+      const snap = await db.collection('users').where('username', '==', u).get();
+      if (!snap.empty) {
+        const user = snap.docs[0].data();
+        if (user.password === p && user.role === 'serveur') {
+          currentUser = { name: user.name, username: user.username, role: user.role, _docId: snap.docs[0].id };
+          await db.collection('users').doc(snap.docs[0].id).update({ lastLogin: new Date().toISOString() });
+          await logEvent(null, 'login', currentUser.name + ' s\'est connecté(e) (serveur)');
+          document.getElementById('login-screen').style.display = 'none';
+          document.getElementById('server-app').style.display = 'block';
+          requestNotifPermission();
+          initApp();
+          return;
+        } else if (user.password === p && user.role !== 'serveur') {
+          document.getElementById('login-error').textContent = 'Ce compte n\'a pas accès à l\'espace serveur';
+          document.getElementById('login-error').style.display = 'block';
+          return;
+        }
+      }
+      // Fallback: default serveur credentials (before profiles exist)
+      if (u === 'serveur' && p === 'serveur1234') {
+        currentUser = { name: 'Serveur', username: 'serveur', role: 'serveur', _docId: null };
+        await logEvent(null, 'login', 'Serveur s\'est connecté(e) (compte par défaut)');
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('server-app').style.display = 'block';
+        requestNotifPermission();
+        initApp();
+        return;
+      }
+      document.getElementById('login-error').textContent = 'Identifiant ou mot de passe incorrect';
+      document.getElementById('login-error').style.display = 'block';
+    } catch(e) {
+      // Firestore offline? fallback
+      if (u === 'serveur' && p === 'serveur1234') {
+        currentUser = { name: 'Serveur', username: 'serveur', role: 'serveur', _docId: null };
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('server-app').style.display = 'block';
+        requestNotifPermission();
+        initApp();
+      } else {
+        document.getElementById('login-error').textContent = 'Erreur de connexion';
+        document.getElementById('login-error').style.display = 'block';
+      }
+    }
+  }, 0);
+}
+
+async function logEvent(orderId, eventType, details) {
+  const logEntry = {
+    orderId: orderId || '',
+    eventType,
+    details,
+    timestamp: new Date().toISOString(),
+    user: currentUser ? currentUser.name : 'Serveur'
+  };
+  try {
+    await db.collection('audit_log').add(logEntry);
+  } catch (e) {
+    console.error('Erreur log audit:', e);
+  }
+}
+
+function logout() {
+  if (currentUser) {
+    logEvent(null, 'logout', (currentUser ? currentUser.name : 'Serveur') + ' s\'est déconnecté(e)');
+  }
+  currentUser = null;
+  if (ordersUnsubscribe) { ordersUnsubscribe(); ordersUnsubscribe = null; }
+  allOrders = [];
+  previousOrderIds = new Set();
+  previousReadyIds = new Set();
+  document.getElementById('server-app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+/* ============================================================
+   STATE
+============================================================ */
+let ordersUnsubscribe = null;
+let allOrders = [];
+let currentView = 'table';
+let soundMuted = false;
+let previousOrderIds = new Set();
+let previousReadyIds = new Set();
+let firstLoad = true;
+
+/* ============================================================
+   INIT
+============================================================ */
+function initApp() {
+  ordersUnsubscribe = db.collection('orders').onSnapshot(snapshot => {
+    const newOrders = snapshot.docs.map(doc => ({ ...doc.data(), _docId: doc.id }));
+    newOrders.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+    if (!firstLoad) {
+      detectNotifications(newOrders);
+    }
+
+    allOrders = newOrders;
+    firstLoad = false;
+
+    // Build known IDs
+    previousOrderIds = new Set(allOrders.map(o => o.id));
+    previousReadyIds = new Set(allOrders.filter(o => o.status === 'ready').map(o => o.id));
+
+    renderStats();
+    renderOrders();
+    startTimers();
+  });
+}
+
+/* ============================================================
+   NOTIFICATIONS PUSH — permission
+============================================================ */
+function requestNotifPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+/* ============================================================
+   NOTIFICATIONS — détection des changements
+============================================================ */
+function detectNotifications(newOrders) {
+  // New orders
+  newOrders.forEach(o => {
+    if (!previousOrderIds.has(o.id) && ['received','preparing','ready'].includes(o.status)) {
+      fireNotification('new', o);
+    }
+  });
+
+  // Orders that just became "ready"
+  newOrders.forEach(o => {
+    if (o.status === 'ready' && !previousReadyIds.has(o.id) && previousOrderIds.has(o.id)) {
+      fireNotification('ready', o);
+    }
+  });
+}
+
+function fireNotification(type, order) {
+  showToast(type, order);
+  showFlash(type);
+  playSound(type);
+  vibrate(type);
+  sendPushNotif(type, order);
+  if (type === 'ready') showReadyBanner(order);
+}
+
+/* ============================================================
+   TOAST (in-app)
+============================================================ */
+function showToast(type, order) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast' + (type === 'ready' ? ' toast-ready' : '');
+
+  const tableText = order.table ? 'Table ' + order.table : 'Sans table';
+  const itemCount = (order.items || []).reduce((s, i) => s + i.qty, 0);
+
+  if (type === 'new') {
+    toast.innerHTML = '<div class="toast-icon">🆕</div><div><div class="toast-text">Nouvelle commande — ' + tableText + '</div><div class="toast-sub">' + itemCount + ' article(s) · ' + order.id + '</div></div>';
+  } else {
+    toast.innerHTML = '<div class="toast-icon">✅</div><div><div class="toast-text">Commande PRÊTE — ' + tableText + '</div><div class="toast-sub">' + order.id + ' · À servir !</div></div>';
+  }
+
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('leaving');
+    setTimeout(() => toast.remove(), 300);
+  }, 5000);
+}
+
+/* ============================================================
+   FLASH VISUEL (plein écran)
+============================================================ */
+function showFlash(type) {
+  const overlay = document.getElementById('flash-overlay');
+  overlay.className = 'flash-overlay';
+  void overlay.offsetWidth; // force reflow
+  overlay.classList.add(type === 'ready' ? 'flash-ready' : 'flash-new');
+}
+
+/* ============================================================
+   READY BANNER (persistent until tapped)
+============================================================ */
+let readyBannerOrders = [];
+
+function showReadyBanner(order) {
+  readyBannerOrders.push(order);
+  const banner = document.getElementById('ready-banner');
+  const tableText = order.table ? 'Table ' + order.table : order.id;
+  banner.textContent = '🔔 COMMANDE PRÊTE — ' + tableText + ' — APPUYEZ ICI';
+  banner.classList.add('visible');
+}
+
+function dismissReadyBanner() {
+  readyBannerOrders = [];
+  document.getElementById('ready-banner').classList.remove('visible');
+}
+
+/* ============================================================
+   VIBRATION
+============================================================ */
+function vibrate(type) {
+  if (!navigator.vibrate) return;
+  if (type === 'new') {
+    navigator.vibrate([200, 100, 200]);
+  } else {
+    // Ready: plus long et insistant
+    navigator.vibrate([300, 100, 300, 100, 300, 100, 300]);
+  }
+}
+
+/* ============================================================
+   NOTIFICATION PUSH VIA SERVICE WORKER (fonctionne en arrière-plan)
+============================================================ */
+function sendPushNotif(type, order) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return;
+
+  const tableText = order.table ? 'Table ' + order.table : 'Sans table';
+  const itemCount = (order.items || []).reduce((s, i) => s + i.qty, 0);
+
+  let title, body;
+  if (type === 'new') {
+    title = '🆕 Nouvelle commande';
+    body = tableText + ' — ' + itemCount + ' article(s)';
+  } else {
+    title = '✅ Commande PRÊTE !';
+    body = tableText + ' — ' + order.id + ' — À servir maintenant !';
+  }
+
+  // Send to Service Worker for persistent notification
+  navigator.serviceWorker.controller.postMessage({
+    type: 'SHOW_NOTIFICATION',
+    title: title,
+    body: body,
+    tag: type + '-' + order.id,
+    requireInteraction: type === 'ready',
+    notifType: type
+  });
+}
+
+/* ============================================================
+   SON — fichiers audio réels (plus fiables que Web Audio sur mobile)
+============================================================ */
+const audioNew = new Audio('/notif-new.wav');
+const audioReady = new Audio('/notif-ready.wav');
+audioNew.preload = 'auto';
+audioReady.preload = 'auto';
+
+function playSound(type) {
+  if (soundMuted) return;
+  try {
+    const audio = type === 'ready' ? audioReady : audioNew;
+    audio.currentTime = 0;
+    audio.volume = 1.0;
+    const playPromise = audio.play();
+    if (playPromise) {
+      playPromise.catch(() => {
+        // Fallback to Web Audio API if file play fails
+        playBeepFallback(type);
+      });
+    }
+  } catch(e) {
+    playBeepFallback(type);
+  }
+}
+
+/* Fallback Web Audio (in case audio files can't play) */
+function playBeepFallback(type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state === 'suspended') ctx.resume();
+    const freqs = type === 'ready' ? [600,700,800,900,1100] : [800,1000];
+    freqs.forEach((f, i) => {
+      setTimeout(() => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = f;
+        osc.type = 'square';
+        gain.gain.value = 0.8;
+        osc.start();
+        osc.stop(ctx.currentTime + 0.15);
+      }, i * 180);
+    });
+  } catch(e) {}
+}
+
+function toggleMute() {
+  soundMuted = !soundMuted;
+  document.getElementById('btn-mute').textContent = soundMuted ? '🔇' : '🔔';
+}
+
+/* ============================================================
+   STATS
+============================================================ */
+function renderStats() {
+  const active = allOrders.filter(o => ['received','preparing','ready'].includes(o.status));
+  const received = active.filter(o => o.status === 'received').length;
+  const preparing = active.filter(o => o.status === 'preparing').length;
+  const ready = active.filter(o => o.status === 'ready').length;
+  const awaiting = allOrders.filter(o => o.status === 'served' && o.paymentStatus === 'pending').length;
+
+  document.getElementById('stats-bar').innerHTML =
+    '<div class="stat-chip"><div><div class="stat-chip-val blue">' + active.length + '</div><div class="stat-chip-label">En cours</div></div></div>' +
+    '<div class="stat-chip"><div><div class="stat-chip-val blue">' + received + '</div><div class="stat-chip-label">Reçues</div></div></div>' +
+    '<div class="stat-chip"><div><div class="stat-chip-val orange">' + preparing + '</div><div class="stat-chip-label">En prépa</div></div></div>' +
+    '<div class="stat-chip"><div><div class="stat-chip-val green">' + ready + '</div><div class="stat-chip-label">Prêtes</div></div></div>' +
+    (awaiting > 0 ? '<div class="stat-chip"><div><div class="stat-chip-val red">' + awaiting + '</div><div class="stat-chip-label">À encaisser</div></div></div>' : '');
+}
+
+/* ============================================================
+   VIEW SWITCHING
+============================================================ */
+function switchView(view, btn) {
+  currentView = view;
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderOrders();
+}
+
+/* ============================================================
+   RENDER ORDERS
+============================================================ */
+function renderOrders() {
+  const container = document.getElementById('orders-container');
+  const active = allOrders.filter(o =>
+    ['received','preparing','ready'].includes(o.status) ||
+    (o.status === 'served' && o.paymentStatus === 'pending')
+  );
+
+  if (active.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✨</div><div class="empty-state-text">Aucune commande en cours</div></div>';
+    return;
+  }
+
+  if (currentView === 'table') renderByTable(container, active);
+  else if (currentView === 'status') renderByStatus(container, active);
+  else renderAll(container, active);
+}
+
+function renderByTable(container, orders) {
+  // Group by table
+  const groups = {};
+  orders.forEach(o => {
+    const key = o.table ? 'Table ' + o.table : 'Sans table';
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(o);
+  });
+
+  // Sort table groups: tables with "ready" orders first
+  const sortedKeys = Object.keys(groups).sort((a, b) => {
+    const aHasReady = groups[a].some(o => o.status === 'ready') ? 0 : 1;
+    const bHasReady = groups[b].some(o => o.status === 'ready') ? 0 : 1;
+    if (aHasReady !== bHasReady) return aHasReady - bHasReady;
+    return a.localeCompare(b, 'fr', { numeric: true });
+  });
+
+  let html = '';
+  sortedKeys.forEach(key => {
+    const tableOrders = groups[key];
+    const hasReady = tableOrders.some(o => o.status === 'ready');
+    html += '<div class="table-group">';
+    html += '<div class="table-group-header">';
+    html += '<span class="table-group-badge" style="' + (hasReady ? 'background:var(--success)' : '') + '">🪑 ' + key + '</span>';
+    html += '<span class="table-group-count">' + tableOrders.length + ' commande(s)</span>';
+    if (hasReady) html += '<span style="font-size:12px;font-weight:700;color:var(--success)">🔔 PRÊTE</span>';
+    html += '</div>';
+    tableOrders.forEach(o => { html += renderOrderCard(o); });
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function renderByStatus(container, orders) {
+  const statusGroups = [
+    { key: 'ready', label: '🟢 Prêtes à servir', color: 'var(--success)' },
+    { key: 'preparing', label: '🟡 En préparation', color: 'var(--warning)' },
+    { key: 'received', label: '🔵 Reçues', color: 'var(--info)' },
+    { key: 'awaiting', label: '⚠️ Paiement en attente', color: 'var(--danger)' }
+  ];
+
+  let html = '';
+  statusGroups.forEach(sg => {
+    let filtered;
+    if (sg.key === 'awaiting') {
+      filtered = orders.filter(o => o.status === 'served' && o.paymentStatus === 'pending');
+    } else {
+      filtered = orders.filter(o => o.status === sg.key);
+    }
+    if (filtered.length === 0) return;
+    html += '<div class="table-group">';
+    html += '<div class="table-group-header">';
+    html += '<span class="table-group-badge" style="background:' + sg.color + '">' + sg.label + '</span>';
+    html += '<span class="table-group-count">' + filtered.length + '</span>';
+    html += '</div>';
+    filtered.forEach(o => { html += renderOrderCard(o); });
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function renderAll(container, orders) {
+  // Sort: ready first, then by time
+  const sorted = [...orders].sort((a, b) => {
+    const priority = { ready: 0, preparing: 1, received: 2, served: 3 };
+    const pa = priority[a.status] ?? 4;
+    const pb = priority[b.status] ?? 4;
+    if (pa !== pb) return pa - pb;
+    return new Date(a.timestamp) - new Date(b.timestamp);
+  });
+  container.innerHTML = sorted.map(o => renderOrderCard(o)).join('');
+}
+
+function renderOrderCard(order) {
+  const elapsed = getElapsedSeconds(order.timestamp);
+  const tClass = timerClass(elapsed);
+  const orderTime = new Date(order.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const total = (order.items || []).reduce((s, i) => s + i.price * i.qty, 0);
+  const isAwaiting = order.status === 'served' && order.paymentStatus === 'pending';
+
+  const statusBadge = {
+    received: '<span class="order-status-badge badge-received">🔵 Reçue</span>',
+    preparing: '<span class="order-status-badge badge-preparing">🟡 En préparation</span>',
+    ready: '<span class="order-status-badge badge-ready">✅ PRÊTE</span>'
+  }[order.status] || '';
+
+  const pmLabels = {
+    apple_pay: ' Apple Pay', google_pay: 'G Pay', card_online: '💳 Carte',
+    card_counter: '💳 CB comptoir', cash: '💵 Espèces'
+  };
+  const pmOnline = ['apple_pay','google_pay','card_online'];
+  const isOnline = pmOnline.includes(order.paymentMethod);
+  const payLabel = (pmLabels[order.paymentMethod] || order.paymentMethod) + (isOnline || order.paymentStatus === 'paid' ? ' ✅' : ' ⏳');
+
+  let itemsHtml = (order.items || []).map(i =>
+    '<div class="order-item"><span><span class="order-item-qty">' + i.qty + '×</span> ' + i.name + '</span><span style="color:var(--muted)">' + fmt(i.price * i.qty) + '</span></div>'
+  ).join('');
+
+  let actionsHtml = '';
+  if (order.status === 'ready') {
+    actionsHtml = '<div class="order-actions"><button class="action-btn btn-mark-served" onclick="markServed(\'' + order.id + '\')">✅ Marquer servie</button></div>';
+  } else if (isAwaiting) {
+    actionsHtml = '<div class="order-actions"><button class="action-btn" style="background:var(--warning);color:white" onclick="markPaid(\'' + order.id + '\')">💰 Encaisser</button></div>';
+  }
+
+  return '<div class="order-card status-' + order.status + '" id="order-card-' + order.id + '">' +
+    '<div class="order-header">' +
+      '<div>' +
+        '<div class="order-id">' + order.id + '</div>' +
+        (order.table ? '<div style="font-size:13px;font-weight:700;color:var(--primary);margin-top:1px">🪑 Table ' + order.table + '</div>' : '') +
+        '<div class="order-time">⏱ ' + orderTime + '</div>' +
+      '</div>' +
+      '<div class="order-timer ' + tClass + '" data-ts="' + order.timestamp + '">' + formatTimer(elapsed) + '</div>' +
+    '</div>' +
+    statusBadge +
+    '<div class="order-items-list">' + itemsHtml + '</div>' +
+    '<div class="order-total"><span>Total</span><span>' + fmt(total) + '</span></div>' +
+    '<div class="order-payment">' + payLabel + '</div>' +
+    actionsHtml +
+  '</div>';
+}
+
+/* ============================================================
+   ACTIONS
+============================================================ */
+async function markServed(orderId) {
+  const order = allOrders.find(o => o.id === orderId);
+  if (!order) return;
+  const card = document.getElementById('order-card-' + orderId);
+  if (card) {
+    card.style.transition = 'all 0.4s ease';
+    card.style.opacity = '0';
+    card.style.transform = 'scale(0.95)';
+  }
+  const changes = { status: 'served', servedAt: new Date().toISOString() };
+  const userName = currentUser ? currentUser.name : 'Serveur';
+  setTimeout(async () => {
+    await db.collection('orders').doc(order._docId).update(changes);
+    await logEvent(orderId, 'served', 'Commande ' + orderId + ' servie par ' + userName);
+  }, 400);
+}
+
+async function markPaid(orderId) {
+  const order = allOrders.find(o => o.id === orderId);
+  if (!order) return;
+  const userName = currentUser ? currentUser.name : 'Serveur';
+  await db.collection('orders').doc(order._docId).update({ paymentStatus: 'paid' });
+  await logEvent(orderId, 'payment', 'Commande ' + orderId + ' marquée payée par ' + userName);
+}
+
+/* ============================================================
+   TIMERS
+============================================================ */
+let timerInterval = null;
+
+function startTimers() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    document.querySelectorAll('[data-ts]').forEach(el => {
+      const elapsed = getElapsedSeconds(el.dataset.ts);
+      el.textContent = formatTimer(elapsed);
+      el.className = 'order-timer ' + timerClass(elapsed);
+    });
+  }, 1000);
+}
+
+function getElapsedSeconds(timestamp) {
+  return Math.floor((Date.now() - new Date(timestamp).getTime()) / 1000);
+}
+
+function formatTimer(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return pad(m) + ':' + pad(s);
+}
+
+function pad(n) { return n.toString().padStart(2, '0'); }
+
+function timerClass(seconds) {
+  if (seconds < 600) return 'green';
+  if (seconds < 1200) return 'orange';
+  return 'red';
+}
+
+/* ============================================================
+   UTILS
+============================================================ */
+function fmt(amount) {
+  return amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+}
+
+/* ============================================================
+   SERVICE WORKER REGISTRATION
+============================================================ */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(reg => {
+    console.log('Service Worker enregistré:', reg.scope);
+  }).catch(err => {
+    console.warn('SW registration failed:', err);
+  });
+}
+
+/* ============================================================
+   WAKE LOCK — empêche l'écran de se mettre en veille
+============================================================ */
+let wakeLock = null;
+
+async function requestWakeLock() {
+  if (!('wakeLock' in navigator)) return;
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    console.log('Wake Lock activé — écran restera allumé');
+    wakeLock.addEventListener('release', () => {
+      console.log('Wake Lock relâché');
+    });
+  } catch(e) {
+    console.warn('Wake Lock impossible:', e);
+  }
+}
+
+// Re-acquire wake lock when page becomes visible again
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && !wakeLock) {
+    requestWakeLock();
+  }
+});
+
+/* ============================================================
+   AUDIO UNLOCK — déverrouille l'audio au premier toucher
+   (obligatoire sur iOS et certains Android)
+============================================================ */
+let audioUnlocked = false;
+
+function unlockAudio() {
+  if (audioUnlocked) return;
+  // Play silent sounds to unlock audio playback
+  audioNew.volume = 0.01;
+  audioNew.play().then(() => { audioNew.pause(); audioNew.volume = 1.0; }).catch(() => {});
+  audioReady.volume = 0.01;
+  audioReady.play().then(() => { audioReady.pause(); audioReady.volume = 1.0; }).catch(() => {});
+  audioUnlocked = true;
+  // Also activate wake lock on first interaction
+  requestWakeLock();
+}
+
+document.addEventListener('touchstart', unlockAudio, { once: true });
+document.addEventListener('click', unlockAudio, { once: true });
+</script>
+</body>
+</html>
