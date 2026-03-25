@@ -699,7 +699,7 @@ function renderActiveOrders() {
         <div class="order-card-header">
           <div>
             <div class="order-num">${order.id}</div>
-            ${order.table ? `<div style="font-size:14px;font-weight:700;color:#6366F1;margin-top:2px">🚑 Table ${order.table}</div>` : ''}
+            ${order.table ? `<div style="font-size:14px;font-weight:700;color:#6366F1;margin-top:2px">🪑 Table ${order.table}</div>` : ''}
             <div class="order-time">⏱ Reçue à ${orderTime}</div>
           </div>
           <div class="order-timer ${tClass}" id="timer-${order.id}" data-ts="${order.timestamp}">
