@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Back-Office Admin — Mon Restaurant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #E8401C;
+      --primary-dark: #C4310F;
+      --secondary: #1A1A2E;
+      --accent: #F5A623;
+      --bg: #F3F4F6;
+      --card: #FFFFFF;
+      --text: #1A1A1A;
+      --muted: #6B7280;
+      --border: #E5E7EB;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --info: #3B82F6;
+      --radius: 14px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.07);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    button { cursor: pointer; font-family: inherit; border: none; outline: none; }
+    input, select, textarea { font-family: inherit; outline: none; }
+
+    /* LOGIN */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1A1A2E 0%, #2d1b69 100%);
+      padding: 24px;
+    }
+    .login-card {
+      background: white;
+      border-radius: 20px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+    .login-logo { font-size: 48px; margin-bottom: 16px; }
+    .login-title { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+    .login-sub { font-size: 14px; color: var(--muted); margin-bottom: 32px; }
+    .login-field { margin-bottom: 14px; text-align: left; }
+    .login-label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 6px; }
+    .login-input {
+      width: 100%;
+      padding: 13px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 15px;
+      transition: border-color 0.2s;
+    }
+    .login-input:focus { border-color: var(--primary); }
+    .login-error { color: var(--danger); font-size: 13px; margin-bottom: 12px; display: none; }
+    .login-btn {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      transition: background 0.2s;
+    }
+    .login-btn:hover { background: var(--primary-dark); }
+
+    /* MAIN APP */
+    #main-app { display: none; }
+    .admin-layout { display: flex; min-height: 100vh; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 240px;
+      background: var(--secondary);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+    }
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .sidebar-logo { font-size: 28px; margin-bottom: 4px; }
+    .sidebar-title { font-size: 16px; font-weight: 800; }
+    .sidebar-sub { font-size: 12px; color: rgba(255,255,255,0.5); }
+    .sidebar-nav { flex: 1; padding: 16px 12px; }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.65);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 2px;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
+    .nav-item.active { background: var(--primary); color: white; }
+    .nav-icon { font-size: 18px; width: 24px; text-align: center; }
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.5);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .logout-btn:hover { color: white; }
+
+    /* MAIN CONTENT */
+    .main-content {
+      margin-left: 240px;
+      flex: 1;
+      min-height: 100vh;
+    }
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .topbar-title { font-size: 20px; font-weight: 800; }
+    .topbar-actions { display: flex; gap: 10px; align-items: center; }
+    .topbar-badge {
+      background: #FEF3C7;
+      color: #D97706;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+    .refresh-btn {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .refresh-btn:hover { background: var(--border); }
+    .content-area { padding: 24px 28px; }
+
+    /* SECTION TABS */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* STATS CARDS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .stat-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 8px; }
+    .stat-value { font-size: 28px; font-weight: 900; color: var(--text); }
+    .stat-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .stat-card.accent-green .stat-value { color: var(--success); }
+    .stat-card.accent-orange .stat-value { color: var(--warning); }
+    .stat-card.accent-red .stat-value { color: var(--danger); }
+    .stat-card.accent-blue .stat-value { color: var(--info); }
+
+    /* ORDERS TABLE */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-title { font-size: 16px; font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: var(--bg); }
+    th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 14px 16px;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #FAFAFA; }
+
+    /* BADGES */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .badge-received { background: #DBEAFE; color: #1D4ED8; }
+    .badge-preparing { background: #FEF3C7; color: #D97706; }
+    .badge-ready { background: #FED7AA; color: #EA580C; }
+    .badge-served { background: #D1FAE5; color: #059669; }
+    .badge-cancelled { background: #FEE2E2; color: #DC2626; }
+    .badge-paid-online { background: #D1FAE5; color: #059669; }
+    .badge-paid-counter { background: #FEF3C7; color: #D97706; }
+    .badge-pending-payment { background: #FEE2E2; color: #EF4444; }
+
+    /* MENU MANAGEMENT */
+    .menu-section-wrap { margin-bottom: 28px; }
+    .menu-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .menu-section-name { font-size: 18px; font-weight: 800; }
+    .btn-add {
+      background: var(--success);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .menu-items-list { display: flex; flex-direction: column; gap: 10px; }
+    .menu-item-row {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow);
+    }
+    .menu-item-emoji-admin { font-size: 28px; width: 36px; text-align: center; }
+    .menu-item-info { flex: 1; }
+    .menu-item-name-admin { font-size: 15px; font-weight: 700; }
+    .menu-item-price-admin { font-size: 14px; color: var(--muted); }
+    .toggle-available {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .toggle-available.on { background: #D1FAE5; color: #059669; }
+    .toggle-available.off { background: #FEE2E2; color: #EF4444; }
+    .btn-edit-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .btn-edit-item:hover { background: var(--border); }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal {
+      background: white;
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .modal-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-cancel {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .btn-save {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--primary);
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .form-group-admin { margin-bottom: 12px; }
+    .form-label-admin { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 5px; }
+    .form-input-admin {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .form-input-admin:focus { border-color: var(--primary); }
+
+    /* FILTER BAR */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+    .filter-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+    .filter-btn:hover:not(.active) { border-color: var(--primary); color: var(--primary); }
+
+    /* EXPORT BTN */
+    .btn-export {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-export:hover { background: var(--border); }
+
+    /* CATEGORY MANAGEMENT */
+    .cat-bar {
+      display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
+    }
+    .btn-add-cat {
+      background: var(--info); color: white; padding: 8px 16px; border-radius: 8px;
+      font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px;
+    }
+    .cat-actions {
+      display: flex; gap: 4px; align-items: center;
+    }
+    .btn-icon {
+      width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center;
+      justify-content: center; font-size: 14px; background: var(--bg); border: 1px solid var(--border);
+    }
+    .btn-icon:hover { background: var(--border); }
+    .btn-icon.danger:hover { background: #FEE2E2; border-color: #FECACA; }
+    .btn-icon.primary:hover { background: #EEF2FF; border-color: #C7D2FE; }
+
+    /* PHOTO UPLOAD */
+    .photo-upload-wrap { margin-bottom: 12px; }
+    .photo-preview {
+      width: 100%; height: 140px; border: 2px dashed var(--border); border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+      background: var(--bg); overflow: hidden; position: relative; transition: border-color 0.2s;
+    }
+    .photo-preview:hover { border-color: var(--primary); }
+    .photo-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-preview .placeholder { text-align: center; color: var(--muted); font-size: 13px; }
+    .photo-preview .placeholder span { display: block; font-size: 28px; margin-bottom: 4px; }
+    .photo-remove {
+      position: absolute; top: 6px; right: 6px; width: 24px; height: 24px;
+      background: rgba(239,68,68,0.9); color: white; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+      z-index: 2;
+    }
+
+    /* OPTIONS / SUPPLEMENTS */
+    .options-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .options-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .option-row {
+      display: flex; gap: 8px; align-items: center; margin-bottom: 8px;
+    }
+    .option-row input { flex: 1; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 13px; }
+    .option-row input:focus { border-color: var(--primary); }
+    .option-row .price-input { width: 80px; flex: none; }
+    .btn-remove-opt {
+      width: 28px; height: 28px; border-radius: 6px; background: #FEE2E2;
+      color: #EF4444; display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .btn-add-opt {
+      background: none; color: var(--info); font-size: 13px; font-weight: 600;
+      padding: 6px 0; display: flex; align-items: center; gap: 4px;
+    }
+
+    /* MENU ITEM ROW ENHANCED */
+    .menu-item-photo { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; background: var(--bg); }
+    .menu-item-options-count { font-size: 11px; color: var(--info); font-weight: 600; margin-top: 2px; }
+    .btn-delete-item {
+      padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      background: #FEE2E2; color: #EF4444; border: none;
+    }
+    .btn-delete-item:hover { background: #FECACA; }
+    .reorder-btns { display: flex; flex-direction: column; gap: 2px; }
+    .reorder-btns button {
+      width: 24px; height: 20px; font-size: 10px; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 4px; display: flex;
+      align-items: center; justify-content: center;
+    }
+    .reorder-btns button:hover { background: var(--border); }
+
+    /* DELETE CONFIRM */
+    .btn-danger {
+      flex: 1; padding: 12px; border-radius: 10px;
+      background: var(--danger); color: white; font-size: 14px; font-weight: 700;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">🔐</div>
+    <h1 class="login-title">Back-Office Admin</h1>
+    <p class="login-sub">Mon Restaurant — Accès restreint</p>
+    <div class="login-field">
+      <label class="login-label">Identifiant</label>
+      <input type="text" class="login-input" id="login-user" placeholder="admin" autocomplete="off" />
+    </div>
+    <div class="login-field">
+      <label class="login-label">Mot de passe</label>
+      <input type="password" class="login-input" id="login-pass" placeholder="••••••••"
+        autocomplete="new-password" onkeydown="if(event.key==='Enter')tryLogin()" />
+    </div>
+    <div class="login-error" id="login-error">Identifiant ou mot de passe incorrect.</div>
+    <button class="login-btn" onclick="tryLogin()">Se connecter →</button>
+    <p style="font-size:12px;color:var(--muted);margin-top:16px;">Accès réservé au personnel autorisé</p>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app">
+  <div class="admin-layout">
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">🍽️</div>
+        <div class="sidebar-title">Mon Restaurant</div>
+        <div class="sidebar-sub">Administration</div>
+      </div>
+      <div class="sidebar-nav">
+        <div class="nav-item active" onclick="showSection('dashboard')">
+          <span class="nav-icon">📊</span> Tableau de bord
+        </div>
+        <div class="nav-item" onclick="showSection('orders')">
+          <span class="nav-icon">📋</span> Commandes
+        </div>
+        <div class="nav-item" onclick="showSection('menu')">
+          <span class="nav-icon">🍴</span> Gestion du menu
+        </div>
+        <div class="nav-item" onclick="showSection('history')">
+          <span class="nav-icon">🗂️</span> Historique
+        </div>
+        <div class="nav-item" onclick="showSection('profiles')">
+          <span class="nav-icon">👥</span> Profils & Accès
+        </div>
+        <div class="nav-item" onclick="openKitchenScreen()">
+          <span class="nav-icon">👨‍🍳</span> Écran Cuisine ↗
+        </div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="logout-btn" onclick="logout()">⎋ Déconnexion</div>
+      </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+      <div class="topbar">
+        <span class="topbar-title" id="topbar-title">Tableau de bord</span>
+        <div class="topbar-actions">
+          <span class="topbar-badge" id="live-badge">🔴 LIVE</span>
+          <button class="refresh-btn" onclick="refreshAll()">🔄 Actualiser</button>
+        </div>
+      </div>
+
+      <div class="content-area">
+
+        <!-- =========== DASHBOARD =========== -->
+        <div class="section active" id="section-dashboard">
+          <div class="stats-grid" id="stats-grid"></div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Commandes en cours</span>
+              <span style="font-size:13px;color:var(--muted)" id="orders-live-count"></span>
+            </div>
+            <div id="dashboard-orders"></div>
+          </div>
+        </div>
+
+        <!-- =========== ORDERS =========== -->
+        <div class="section" id="section-orders">
+          <div class="filter-bar" id="orders-filter">
+            <button class="filter-btn active" onclick="filterOrders('all',this)">Toutes</button>
+            <button class="filter-btn" onclick="filterOrders('received',this)">Reçues</button>
+            <button class="filter-btn" onclick="filterOrders('preparing',this)">En préparation</button>
+            <button class="filter-btn" onclick="filterOrders('ready',this)">Prêtes</button>
+            <button class="filter-btn" onclick="filterOrders('served',this)">Servies</button>
+            <button class="filter-btn" onclick="filterOrders('cancelled',this)">Annulées</button>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Toutes les commandes</span>
+              <div style="display:flex;gap:8px">
+                <button class="btn-export" onclick="exportCSV()">📥 Export CSV</button>
+                <button class="btn-export" onclick="exportAuditLog()">📜 Journal des événements</button>
+              </div>
+            </div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>N° Commande</th>
+                    <th>Heure</th>
+                    <th>Articles</th>
+                    <th>Total</th>
+                    <th>Paiement</th>
+                    <th>Statut paiement</th>
+                    <th>Statut commande</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="orders-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========== MENU =========== -->
+        <div class="section" id="section-menu">
+          <div id="menu-management"></div>
+        </div>
+
+        <!-- =========== PROFILES =========== -->
+        <div class="section" id="section-profiles">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Gestion des profils</span>
+              <button class="btn-export" onclick="openAddProfileModal()" style="background:#6366F1;color:white">+ Nouveau profil</button>
+            </div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nom</th>
+                    <th>Identifiant</th>
+                    <th>Rôle</th>
+                    <th>Dernière connexion</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="profiles-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========== HISTORY =========== -->
+        <div class="section" id="section-history">
+          <div class="stats-grid" id="history-stats"></div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Historique du jour</span>
+              <button class="btn-export" onclick="exportCSV()">📥 Export CSV</button>
+            </div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>N° Commande</th>
+                    <th>Heure</th>
+                    <th>Total</th>
+                    <th>Paiement</th>
+                    <th>Email client</th>
+                    <th>Statut</th>
+                  </tr>
+                </thead>
+                <tbody id="history-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- content-area -->
+    </div><!-- main-content -->
+  </div><!-- admin-layout -->
+</div><!-- main-app -->
+
+<!-- MODAL ÉDITION PLAT (amélioré) -->
+<div class="modal-overlay" id="modal-item" style="display:none">
+  <div class="modal" style="max-width:520px;max-height:90vh;overflow-y:auto">
+    <h3 class="modal-title" id="modal-title">Modifier le plat</h3>
+    <input type="hidden" id="modal-cat" />
+    <input type="hidden" id="modal-idx" />
+    <!-- PHOTO -->
+    <div class="photo-upload-wrap">
+      <label class="form-label-admin">Photo du plat</label>
+      <div class="photo-preview" id="photo-preview" onclick="document.getElementById('photo-input').click()">
+        <div class="placeholder" id="photo-placeholder"><span>📷</span>Cliquez pour ajouter une photo</div>
+      </div>
+      <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)" />
+    </div>
+    <div class="form-row">
+      <div class="form-group-admin">
+        <label class="form-label-admin">Emoji</label>
+        <input class="form-input-admin" id="modal-emoji" placeholder="🍕" maxlength="4" />
+      </div>
+      <div class="form-group-admin">
+        <label class="form-label-admin">Prix (€)</label>
+        <input class="form-input-admin" id="modal-price" type="number" step="0.50" min="0" />
+      </div>
+    </div>
+    <div class="form-group-admin">
+      <label class="form-label-admin">Taux de TVA</label>
+      <select class="form-input-admin" id="modal-tva">
+        <option value="5.5">5,5% (alimentation)</option>
+        <option value="10" selected>10% (restauration sur place)</option>
+        <option value="20">20% (alcool, etc.)</option>
+      </select>
+    </div>
+    <div class="form-group-admin">
+      <label class="form-label-admin">Nom du plat</label>
+      <input class="form-input-admin" id="modal-name" placeholder="Nom du plat" />
+    </div>
+    <div class="form-group-admin">
+      <label class="form-label-admin">Description</label>
+      <input class="form-input-admin" id="modal-desc" placeholder="Courte description..." />
+    </div>
+    <!-- OPTIONS / SUPPLEMENTS -->
+    <div class="options-section">
+      <div class="options-title">Options / Suppléments</div>
+      <div id="options-list"></div>
+      <button class="btn-add-opt" onclick="addOptionRow()">+ Ajouter une option</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Annuler</button>
+      <button class="btn-save" onclick="saveItem()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CATÉGORIE -->
+<div class="modal-overlay" id="modal-cat-edit" style="display:none">
+  <div class="modal" style="max-width:400px">
+    <h3 class="modal-title" id="modal-cat-title">Nouvelle catégorie</h3>
+    <input type="hidden" id="modal-cat-key" />
+    <div class="form-group-admin">
+      <label class="form-label-admin">Emoji</label>
+      <input class="form-input-admin" id="modal-cat-emoji" placeholder="🍽️" maxlength="4" />
+    </div>
+    <div class="form-group-admin">
+      <label class="form-label-admin">Nom de la catégorie</label>
+      <input class="form-input-admin" id="modal-cat-name" placeholder="Ex: Entrées" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeCatModal()">Annuler</button>
+      <button class="btn-save" onclick="saveCat()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMATION SUPPRESSION -->
+<div class="modal-overlay" id="modal-confirm" style="display:none">
+  <div class="modal" style="max-width:400px;text-align:center">
+    <h3 class="modal-title" id="confirm-title">Confirmer la suppression</h3>
+    <p style="color:var(--muted);margin-bottom:20px" id="confirm-msg"></p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeConfirmModal()">Annuler</button>
+      <button class="btn-danger" id="confirm-btn" onclick="">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PROFIL -->
+<div class="modal-overlay" id="modal-profile" style="display:none">
+  <div class="modal" style="max-width:440px">
+    <h3 class="modal-title" id="profile-modal-title">Nouveau profil</h3>
+    <input type="hidden" id="profile-edit-id" />
+    <div class="form-group-admin">
+      <label class="form-label-admin">Nom affiché</label>
+      <input class="form-input-admin" id="profile-name" placeholder="ex: Serveur 1, Chef Martin..." />
+    </div>
+    <div class="form-group-admin">
+      <label class="form-label-admin">Identifiant de connexion</label>
+      <input class="form-input-admin" id="profile-username" placeholder="ex: serveur1" autocomplete="off" />
+    </div>
+    <div class="form-group-admin">
+      <label class="form-label-admin">Mot de passe</label>
+      <input class="form-input-admin" id="profile-password" type="text" placeholder="Min. 4 caractères" autocomplete="off" />
+    </div>
+    <div class="form-group-admin">
+      <label class="form-label-admin">Rôle / Accès</label>
+      <select class="form-input-admin" id="profile-role">
+        <option value="serveur">🍽️ Serveur (espace service)</option>
+        <option value="cuisine">👨‍🍳 Cuisine (écran cuisine)</option>
+        <option value="admin">🔑 Gérant (admin complet)</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeProfileModal()">Annuler</button>
+      <button class="btn-save" onclick="saveProfile()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCK0G7cJ3NnA3sP-GPb08MdfwwPVSmx2Wg",
+    authDomain: "mon-restaurant-29980.firebaseapp.com",
+    projectId: "mon-restaurant-29980",
+    storageBucket: "mon-restaurant-29980.firebasestorage.app",
+    messagingSenderId: "78241830692",
+    appId: "1:78241830692:web:09bf6f6606147f5d3cc5b1"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+
+<script>
+/* ============================================================
+   AUTH — vérifie via Firestore (fallback admin/admin1234)
+============================================================ */
+let currentUser = null; // { name, username, role }
+
+async function tryLogin() {
+  setTimeout(async () => {
+    const u = document.getElementById('login-user').value.trim();
+    const p = document.getElementById('login-pass').value;
+    document.getElementById('login-error').style.display = 'none';
+
+    try {
+      const snap = await db.collection('users').where('username', '==', u).get();
+      if (!snap.empty) {
+        const user = snap.docs[0].data();
+        if (user.password === p && user.role === 'admin') {
+          currentUser = { name: user.name, username: user.username, role: user.role, _docId: snap.docs[0].id };
+          await db.collection('users').doc(snap.docs[0].id).update({ lastLogin: new Date().toISOString() });
+          await logEvent(null, 'login', currentUser.name + ' s\'est connecté(e) (admin)');
+          document.getElementById('login-screen').style.display = 'none';
+          document.getElementById('main-app').style.display = 'block';
+          initAdmin();
+          return;
+        } else if (user.password === p && user.role !== 'admin') {
+          document.getElementById('login-error').textContent = 'Ce compte n\'a pas accès à l\'admin';
+          document.getElementById('login-error').style.display = 'block';
+          return;
+        }
+      }
+      // Fallback: default admin (first time only, before profiles exist)
+      if (u === 'admin' && p === 'admin1234') {
+        currentUser = { name: 'Gérant', username: 'admin', role: 'admin', _docId: null };
+        await logEvent(null, 'login', 'Gérant s\'est connecté(e) (admin, compte par défaut)');
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        initAdmin();
+        return;
+      }
+      document.getElementById('login-error').textContent = 'Identifiant ou mot de passe incorrect';
+      document.getElementById('login-error').style.display = 'block';
+    } catch(e) {
+      // Firestore offline? fallback
+      if (u === 'admin' && p === 'admin1234') {
+        currentUser = { name: 'Gérant', username: 'admin', role: 'admin', _docId: null };
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        initAdmin();
+      } else {
+        document.getElementById('login-error').textContent = 'Erreur de connexion';
+        document.getElementById('login-error').style.display = 'block';
+      }
+    }
+  }, 0);
+}
+
+function logout() {
+  if (currentUser) logEvent(null, 'logout', (currentUser.name || 'Admin') + ' s\'est déconnecté(e)');
+  if (ordersUnsubscribe) { ordersUnsubscribe(); ordersUnsubscribe = null; }
+  allOrders = [];
+  currentUser = null;
+  document.getElementById('main-app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+}
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+let currentOrderFilter = 'all';
+
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('section-' + name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.textContent.toLowerCase().includes(getSectionLabel(name))) n.classList.add('active');
+  });
+  const titles = { dashboard: 'Tableau de bord', orders: 'Commandes', menu: 'Gestion du menu', profiles: 'Profils & Accès', history: 'Historique' };
+  document.getElementById('topbar-title').textContent = titles[name] || name;
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'orders') renderOrdersTable();
+  if (name === 'menu') renderMenuManagement();
+  if (name === 'profiles') renderProfiles();
+  if (name === 'history') renderHistory();
+}
+
+function getSectionLabel(name) {
+  const map = { dashboard: 'tableau', orders: 'commandes', menu: 'menu', profiles: 'profils', history: 'historique' };
+  return map[name] || name;
+}
+
+function openKitchenScreen() {
+  window.open('cuisine.html', '_blank');
+}
+
+/* ============================================================
+   ÉTAT GLOBAL — Firestore temps réel
+============================================================ */
+let allOrders = [];
+let ordersUnsubscribe = null;
+
+function getOrders() {
+  return allOrders;
+}
+
+/* ============================================================
+   AUDIT LOG
+============================================================ */
+async function logEvent(orderId, eventType, details) {
+  const logEntry = {
+    orderId: orderId || '',
+    eventType,
+    details,
+    timestamp: new Date().toISOString(),
+    user: currentUser ? currentUser.name : 'admin'
+  };
+  try {
+    await db.collection('audit_log').add(logEntry);
+  } catch (e) {
+    console.error('Erreur log audit:', e);
+  }
+}
+
+async function updateOrderStatus(orderId, newStatus) {
+  const order = allOrders.find(o => o.id === orderId);
+  if (!order) return;
+  const oldStatus = order.status;
+  const changes = { status: newStatus };
+  if (newStatus === 'served') changes.servedAt = new Date().toISOString();
+  await db.collection('orders').doc(order._docId).update(changes);
+  await logEvent(orderId, 'status_changed', `Statut: ${oldStatus} → ${newStatus}`);
+}
+
+async function markAsPaid(orderId) {
+  const order = allOrders.find(o => o.id === orderId);
+  if (!order) return;
+  await db.collection('orders').doc(order._docId).update({ paymentStatus: 'paid' });
+  await logEvent(orderId, 'marked_paid', 'Commande marquée comme payée');
+}
+
+async function cancelOrder(orderId) {
+  const order = allOrders.find(o => o.id === orderId);
+  if (!order) return;
+  const isOnline = ['apple_pay','google_pay','card_online'].includes(order.paymentMethod);
+  if (isOnline && order.paymentStatus === 'paid') {
+    alert('Impossible d\'annuler une commande déjà payée en ligne. Le remboursement doit être effectué depuis votre plateforme de paiement (Stripe, etc.).');
+    return;
+  }
+  if (!confirm('Êtes-vous sûr de vouloir annuler la commande ' + orderId + ' ?')) return;
+  await db.collection('orders').doc(order._docId).update({ status: 'cancelled' });
+  await logEvent(orderId, 'cancelled', 'Commande annulée');
+}
+
+/* ============================================================
+   MENU DATA (chargé depuis Firestore, fallback local)
+============================================================ */
+let MENU_DATA = {
+  entrees: { label: "🥗 Entrées", items: [
+    { id: "e1", name: "Soupe à l'oignon gratinée", desc: "Bouillon de bœuf, croutons, gruyère fondu", price: 8.50, emoji: "🍲", available: true },
+    { id: "e2", name: "Foie gras maison", desc: "Foie gras de canard, chutney de figues, brioche", price: 16.00, emoji: "🫙", available: true },
+    { id: "e3", name: "Salade de chèvre chaud", desc: "Mesclun, toasts de chèvre, noix, miel", price: 10.50, emoji: "🥗", available: true },
+    { id: "e4", name: "Tartare de saumon", desc: "Saumon frais, avocat, citron vert, aneth", price: 13.00, emoji: "🐟", available: true },
+  ]},
+  plats: { label: "🥩 Plats", items: [
+    { id: "p1", name: "Entrecôte grillée", desc: "Entrecôte de bœuf, sauce béarnaise, frites maison", price: 26.00, emoji: "🥩", available: true },
+    { id: "p2", name: "Filet de bar rôti", desc: "Bar entier, beurre blanc, légumes de saison", price: 24.00, emoji: "🐟", available: true },
+    { id: "p3", name: "Poulet rôti fermier", desc: "Poulet Label Rouge, jus de volaille, pommes vapeur", price: 18.00, emoji: "🍗", available: true },
+    { id: "p4", name: "Risotto aux cèpes", desc: "Riz Arborio, cèpes frais, parmesan, truffe noire", price: 19.50, emoji: "🍄", available: true },
+    { id: "p5", name: "Magret de canard", desc: "Magret rosé, sauce aux cerises, gratin dauphinois", price: 22.00, emoji: "🦆", available: true },
+  ]},
+  desserts: { label: "🍮 Desserts", items: [
+    { id: "d1", name: "Crème brûlée", desc: "Crème vanillée, caramel croustillant", price: 7.50, emoji: "🍮", available: true },
+    { id: "d2", name: "Tarte tatin", desc: "Pommes caramélisées, pâte feuilletée, crème fraîche", price: 8.00, emoji: "🥧", available: true },
+    { id: "d3", name: "Fondant au chocolat", desc: "Cœur coulant, glace vanille, coulis de caramel", price: 9.00, emoji: "🍫", available: true },
+    { id: "d4", name: "Assiette de fromages", desc: "Sélection de 3 fromages, pain de campagne, confiture", price: 11.00, emoji: "🧀", available: true },
+  ]},
+  boissons: { label: "🥤 Boissons", items: [
+    { id: "b1", name: "Eau minérale 75cl", desc: "Évian ou Perrier", price: 4.00, emoji: "💧", available: true },
+    { id: "b2", name: "Coca-Cola 33cl", desc: "Original, Zéro ou Light", price: 3.50, emoji: "🥤", available: true },
+    { id: "b3", name: "Jus de fruits frais", desc: "Orange pressée, pomme ou pamplemousse", price: 5.50, emoji: "🍊", available: true },
+    { id: "b4", name: "Café espresso", desc: "Arabica 100%, single ou double", price: 2.50, emoji: "☕", available: true },
+  ]},
+  vins: { label: "🍷 Vins", items: [
+    { id: "v1", name: "Bordeaux Rouge 75cl", desc: "Château Margaux 2018", price: 42.00, emoji: "🍷", available: true },
+    { id: "v2", name: "Bourgogne Blanc 75cl", desc: "Chablis Premier Cru", price: 38.00, emoji: "🥂", available: true },
+    { id: "v3", name: "Rosé Provence 75cl", desc: "Château Minuty", price: 28.00, emoji: "🌹", available: true },
+    { id: "v4", name: "Champagne 75cl", desc: "Moët & Chandon Impérial Brut", price: 65.00, emoji: "🍾", available: true },
+  ]}
+};
+
+async function saveMenu() {
+  try {
+    await db.collection('config').doc('menu').set(MENU_DATA);
+  } catch (e) {
+    console.error('Erreur sauvegarde menu Firestore:', e);
+  }
+}
+
+/* ============================================================
+   DASHBOARD — Init avec listener Firestore temps réel
+============================================================ */
+async function initAdmin() {
+  // Charger le menu depuis Firestore
+  try {
+    const menuDoc = await db.collection('config').doc('menu').get();
+    if (menuDoc.exists) MENU_DATA = menuDoc.data();
+  } catch (e) { console.warn('Menu local utilisé.'); }
+
+  // Écoute temps réel des commandes
+  ordersUnsubscribe = db.collection('orders').onSnapshot(snapshot => {
+    allOrders = snapshot.docs.map(doc => ({ ...doc.data(), _docId: doc.id }));
+    // Trier par date décroissante
+    allOrders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    // Mettre à jour le badge live
+    const inProgress = allOrders.filter(o => ['received','preparing','ready'].includes(o.status)).length;
+    document.getElementById('live-badge').textContent = inProgress > 0 ? `🔴 ${inProgress} en cours` : '🟢 LIVE';
+    refreshAll();
+  }, err => {
+    console.error('Erreur Firestore orders:', err);
+  });
+
+  renderDashboard();
+}
+
+function refreshAll() {
+  const active = document.querySelector('.section.active');
+  if (!active) return;
+  const id = active.id.replace('section-', '');
+  if (id === 'dashboard') renderDashboard();
+  else if (id === 'orders') renderOrdersTable();
+  else if (id === 'history') renderHistory();
+}
+
+function calcAvgServiceTime(orders) {
+  const served = orders.filter(o => o.status === 'served' && o.servedAt && o.timestamp);
+  if (served.length === 0) return null;
+  const totalSec = served.reduce((s, o) => {
+    return s + (new Date(o.servedAt) - new Date(o.timestamp)) / 1000;
+  }, 0);
+  const avgSec = Math.round(totalSec / served.length);
+  const m = Math.floor(avgSec / 60);
+  const s = avgSec % 60;
+  return m > 0 ? `${m} min ${s < 10 ? '0' : ''}${s} s` : `${avgSec} s`;
+}
+
+function renderDashboard() {
+  const orders = getOrders();
+  const today = new Date().toDateString();
+  const todayOrders = orders.filter(o => new Date(o.timestamp).toDateString() === today);
+
+  const totalRevenue = todayOrders.filter(o => o.paymentStatus === 'paid' && o.status !== 'cancelled').reduce((s, o) => s + o.total, 0);
+  const onlineRevenue = todayOrders.filter(o => o.paymentStatus === 'paid' && o.status !== 'cancelled' && ['apple_pay','google_pay','card_online'].includes(o.paymentMethod)).reduce((s, o) => s + o.total, 0);
+  const pendingRevenue = todayOrders.filter(o => o.paymentStatus === 'pending' && o.status !== 'cancelled').reduce((s, o) => s + o.total, 0);
+  const inProgress = orders.filter(o => ['received','preparing','ready'].includes(o.status) && o.status !== 'cancelled').length;
+  const avgService = calcAvgServiceTime(todayOrders);
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card accent-green">
+      <div class="stat-label">CA encaissé aujourd'hui</div>
+      <div class="stat-value">${fmt(totalRevenue)}</div>
+      <div class="stat-sub">En ligne: ${fmt(onlineRevenue)}</div>
+    </div>
+    <div class="stat-card accent-orange">
+      <div class="stat-label">À encaisser au comptoir</div>
+      <div class="stat-value">${fmt(pendingRevenue)}</div>
+      <div class="stat-sub">${todayOrders.filter(o=>o.paymentStatus==='pending').length} commande(s)</div>
+    </div>
+    <div class="stat-card accent-blue">
+      <div class="stat-label">Commandes en cours</div>
+      <div class="stat-value">${inProgress}</div>
+      <div class="stat-sub">Actives maintenant</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total commandes today</div>
+      <div class="stat-value">${todayOrders.length}</div>
+      <div class="stat-sub">Depuis l'ouverture</div>
+    </div>
+    ${avgService ? `
+    <div class="stat-card accent-blue">
+      <div class="stat-label">⏱ Temps de service moyen</div>
+      <div class="stat-value" style="font-size:22px">${avgService}</div>
+      <div class="stat-sub">Reçue → Servie (aujourd'hui)</div>
+    </div>` : ''}
+  `;
+
+  const activeOrders = orders.filter(o => ['received','preparing','ready'].includes(o.status));
+  document.getElementById('orders-live-count').textContent = activeOrders.length + ' active(s)';
+  document.getElementById('dashboard-orders').innerHTML = renderOrdersRows(activeOrders, true);
+}
+
+/* ============================================================
+   COMMANDES
+============================================================ */
+function renderOrdersTable() {
+  const orders = getOrders();
+  const filtered = currentOrderFilter === 'all' ? orders : orders.filter(o => o.status === currentOrderFilter);
+  document.getElementById('orders-tbody').innerHTML = renderOrdersRows(filtered, false);
+}
+
+function filterOrders(status, btn) {
+  currentOrderFilter = status;
+  document.querySelectorAll('#orders-filter .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderOrdersTable();
+}
+
+function renderOrdersRows(orders, compact) {
+  if (orders.length === 0) {
+    return `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px">Aucune commande</td></tr>`;
+  }
+  const pmLabels = {
+    apple_pay: ' Apple Pay', google_pay: 'G Pay', card_online: '💳 Carte en ligne',
+    card_counter: '🏧 Carte comptoir', cash: '💵 Espèces'
+  };
+  return orders.map(o => {
+    const d = new Date(o.timestamp);
+    const time = d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+    const isOnline = ['apple_pay','google_pay','card_online'].includes(o.paymentMethod);
+    const statusBadge = {
+      received: '<span class="badge badge-received">🔵 Reçue</span>',
+      preparing: '<span class="badge badge-preparing">🟡 En préparation</span>',
+      ready: '<span class="badge badge-ready">🟠 Prête</span>',
+      served: '<span class="badge badge-served">✅ Servie</span>',
+      cancelled: '<span class="badge badge-cancelled">🚫 Annulée</span>',
+    }[o.status] || o.status;
+    const payStatusBadge = isOnline
+      ? '<span class="badge badge-paid-online">✅ Payé en ligne</span>'
+      : o.paymentStatus === 'paid'
+        ? '<span class="badge badge-paid-online">✅ Encaissé</span>'
+        : '<span class="badge badge-pending-payment">⚠️ À encaisser</span>';
+    const items = (o.items||[]).map(i => `${i.qty}× ${i.name}`).join(', ');
+
+    return `
+      <tr>
+        <td><strong>${o.id}</strong>${o.table ? `<br><span style="font-size:12px;color:#6366F1;font-weight:700">🪑 Table ${o.table}</span>` : ''}</td>
+        <td>${time}</td>
+        <td style="font-size:13px;max-width:200px">${items}</td>
+        <td><strong>${fmt(o.total)}</strong></td>
+        <td>${pmLabels[o.paymentMethod] || o.paymentMethod}</td>
+        <td>${payStatusBadge}</td>
+        <td>${statusBadge}</td>
+        <td>
+          <div style="display:flex;gap:4px">
+            ${!isOnline && o.paymentStatus === 'pending' && o.status === 'served'
+              ? `<button onclick="doMarkPaid('${o.id}')" style="background:#059669;color:white;padding:5px 10px;border-radius:6px;font-size:12px;font-weight:700">Marquer payée</button>`
+              : ''
+            }
+            ${o.status !== 'served' && o.status !== 'cancelled' && !(isOnline && o.paymentStatus === 'paid') ? `<button onclick="cancelOrder('${o.id}')" style="background:#FEE2E2;color:#EF4444;padding:5px 10px;border-radius:6px;font-size:12px;font-weight:700;margin-left:4px">Annuler</button>` : ''}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function doMarkPaid(orderId) {
+  await markAsPaid(orderId);
+  // Le listener onSnapshot va automatiquement rafraîchir la vue
+}
+
+/* ============================================================
+   GESTION DU MENU (complet)
+============================================================ */
+let currentPhoto = null; // base64 de la photo en cours d'édition
+
+function getCatKeys() {
+  // Retourne les clés de catégories dans l'ordre (utilise le champ order si présent)
+  return Object.keys(MENU_DATA).sort((a, b) => {
+    const oa = MENU_DATA[a].order ?? 999;
+    const ob = MENU_DATA[b].order ?? 999;
+    return oa - ob;
+  });
+}
+
+function renderMenuManagement() {
+  const catKeys = getCatKeys();
+  let html = `<div class="cat-bar">
+    <button class="btn-add-cat" onclick="openAddCatModal()">+ Nouvelle catégorie</button>
+  </div>`;
+
+  catKeys.forEach((catKey, catIdx) => {
+    const cat = MENU_DATA[catKey];
+    html += `
+      <div class="menu-section-wrap">
+        <div class="menu-section-head">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="menu-section-name">${cat.label}</div>
+            <div class="cat-actions">
+              ${catIdx > 0 ? `<button class="btn-icon primary" onclick="moveCat('${catKey}',-1)" title="Monter">▲</button>` : ''}
+              ${catIdx < catKeys.length - 1 ? `<button class="btn-icon primary" onclick="moveCat('${catKey}',1)" title="Descendre">▼</button>` : ''}
+              <button class="btn-icon" onclick="openEditCatModal('${catKey}')" title="Renommer">✏️</button>
+              <button class="btn-icon danger" onclick="confirmDeleteCat('${catKey}')" title="Supprimer">🗑️</button>
+            </div>
+          </div>
+          <button class="btn-add" onclick="openAddModal('${catKey}')">+ Ajouter un plat</button>
+        </div>
+        <div class="menu-items-list">
+    `;
+    cat.items.forEach((item, idx) => {
+      const photoHtml = item.photo
+        ? `<img class="menu-item-photo" src="${item.photo}" alt="${item.name}" />`
+        : `<div class="menu-item-emoji-admin">${item.emoji}</div>`;
+      const optCount = (item.options && item.options.length) ? `<div class="menu-item-options-count">📋 ${item.options.length} option(s)</div>` : '';
+      html += `
+        <div class="menu-item-row">
+          <div class="reorder-btns">
+            ${idx > 0 ? `<button onclick="moveItem('${catKey}',${idx},-1)">▲</button>` : '<button style="visibility:hidden">▲</button>'}
+            ${idx < cat.items.length - 1 ? `<button onclick="moveItem('${catKey}',${idx},1)">▼</button>` : '<button style="visibility:hidden">▼</button>'}
+          </div>
+          ${photoHtml}
+          <div class="menu-item-info">
+            <div class="menu-item-name-admin">${item.name}</div>
+            <div class="menu-item-price-admin">${fmt(item.price)} (TVA ${item.tva || 10}%) — ${item.desc}</div>
+            ${optCount}
+          </div>
+          <button class="toggle-available ${item.available?'on':'off'}"
+            onclick="toggleItem('${catKey}',${idx})">
+            ${item.available ? '✅ Dispo' : '❌ Off'}
+          </button>
+          <button class="btn-edit-item" onclick="openEditModal('${catKey}',${idx})">✏️</button>
+          <button class="btn-delete-item" onclick="confirmDeleteItem('${catKey}',${idx})">🗑️</button>
+        </div>
+      `;
+    });
+    if (cat.items.length === 0) {
+      html += `<div style="text-align:center;color:var(--muted);padding:24px;font-size:14px">Aucun plat dans cette catégorie</div>`;
+    }
+    html += `</div></div>`;
+  });
+  document.getElementById('menu-management').innerHTML = html;
+}
+
+function toggleItem(catKey, idx) {
+  MENU_DATA[catKey].items[idx].available = !MENU_DATA[catKey].items[idx].available;
+  saveMenu();
+  renderMenuManagement();
+}
+
+/* --- RÉORGANISATION --- */
+function moveItem(catKey, idx, dir) {
+  const items = MENU_DATA[catKey].items;
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= items.length) return;
+  [items[idx], items[newIdx]] = [items[newIdx], items[idx]];
+  saveMenu();
+  renderMenuManagement();
+}
+
+function moveCat(catKey, dir) {
+  const keys = getCatKeys();
+  const curIdx = keys.indexOf(catKey);
+  const newIdx = curIdx + dir;
+  if (newIdx < 0 || newIdx >= keys.length) return;
+  // Swap orders
+  const otherKey = keys[newIdx];
+  const tmpOrder = MENU_DATA[catKey].order ?? curIdx;
+  MENU_DATA[catKey].order = MENU_DATA[otherKey].order ?? newIdx;
+  MENU_DATA[otherKey].order = tmpOrder;
+  saveMenu();
+  renderMenuManagement();
+}
+
+/* --- PHOTO UPLOAD --- */
+function handlePhotoUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    // Resize to max 400x400
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const maxSize = 400;
+      let w = img.width, h = img.height;
+      if (w > h) { if (w > maxSize) { h = h * maxSize / w; w = maxSize; } }
+      else { if (h > maxSize) { w = w * maxSize / h; h = maxSize; } }
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      currentPhoto = canvas.toDataURL('image/jpeg', 0.7);
+      updatePhotoPreview();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function updatePhotoPreview() {
+  const preview = document.getElementById('photo-preview');
+  if (currentPhoto) {
+    preview.innerHTML = `<img src="${currentPhoto}" /><button class="photo-remove" onclick="event.stopPropagation();removePhoto()">✕</button>`;
+  } else {
+    preview.innerHTML = `<div class="placeholder" id="photo-placeholder"><span>📷</span>Cliquez pour ajouter une photo</div>`;
+  }
+}
+
+function removePhoto() {
+  currentPhoto = null;
+  document.getElementById('photo-input').value = '';
+  updatePhotoPreview();
+}
+
+/* --- OPTIONS / SUPPLEMENTS --- */
+function addOptionRow(name = '', price = '') {
+  const list = document.getElementById('options-list');
+  const row = document.createElement('div');
+  row.className = 'option-row';
+  row.innerHTML = `
+    <input type="text" class="opt-name" placeholder="Ex: Extra fromage" value="${name}" />
+    <input type="number" class="opt-price price-input" step="0.50" min="0" placeholder="€" value="${price}" />
+    <button class="btn-remove-opt" onclick="this.parentElement.remove()">✕</button>
+  `;
+  list.appendChild(row);
+}
+
+function getOptionsFromModal() {
+  const rows = document.querySelectorAll('#options-list .option-row');
+  const options = [];
+  rows.forEach(row => {
+    const name = row.querySelector('.opt-name').value.trim();
+    const price = parseFloat(row.querySelector('.opt-price').value) || 0;
+    if (name) options.push({ name, price });
+  });
+  return options;
+}
+
+/* --- MODAL PLAT --- */
+function openEditModal(catKey, idx) {
+  const item = MENU_DATA[catKey].items[idx];
+  document.getElementById('modal-title').textContent = 'Modifier le plat';
+  document.getElementById('modal-cat').value = catKey;
+  document.getElementById('modal-idx').value = idx;
+  document.getElementById('modal-emoji').value = item.emoji;
+  document.getElementById('modal-name').value = item.name;
+  document.getElementById('modal-desc').value = item.desc;
+  document.getElementById('modal-price').value = item.price;
+  document.getElementById('modal-tva').value = item.tva || '10';
+  currentPhoto = item.photo || null;
+  updatePhotoPreview();
+  // Options
+  document.getElementById('options-list').innerHTML = '';
+  if (item.options && item.options.length) {
+    item.options.forEach(opt => addOptionRow(opt.name, opt.price));
+  }
+  document.getElementById('photo-input').value = '';
+  document.getElementById('modal-item').style.display = 'flex';
+}
+
+function openAddModal(catKey) {
+  document.getElementById('modal-title').textContent = 'Ajouter un plat';
+  document.getElementById('modal-cat').value = catKey;
+  document.getElementById('modal-idx').value = '-1';
+  document.getElementById('modal-emoji').value = '';
+  document.getElementById('modal-name').value = '';
+  document.getElementById('modal-desc').value = '';
+  document.getElementById('modal-price').value = '';
+  document.getElementById('modal-tva').value = '10';
+  currentPhoto = null;
+  updatePhotoPreview();
+  document.getElementById('options-list').innerHTML = '';
+  document.getElementById('photo-input').value = '';
+  document.getElementById('modal-item').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('modal-item').style.display = 'none';
+}
+
+function saveItem() {
+  const catKey = document.getElementById('modal-cat').value;
+  const idx = parseInt(document.getElementById('modal-idx').value);
+  const options = getOptionsFromModal();
+  const item = {
+    id: idx === -1 ? catKey[0] + Date.now() : MENU_DATA[catKey].items[idx].id,
+    emoji: document.getElementById('modal-emoji').value || '🍽️',
+    name: document.getElementById('modal-name').value,
+    desc: document.getElementById('modal-desc').value,
+    price: parseFloat(document.getElementById('modal-price').value) || 0,
+    tva: parseFloat(document.getElementById('modal-tva').value),
+    available: idx === -1 ? true : MENU_DATA[catKey].items[idx].available,
+    photo: currentPhoto || null,
+    options: options.length > 0 ? options : null
+  };
+  if (!item.name) { alert('Le nom du plat est requis'); return; }
+  if (idx === -1) {
+    MENU_DATA[catKey].items.push(item);
+  } else {
+    MENU_DATA[catKey].items[idx] = { ...MENU_DATA[catKey].items[idx], ...item };
+  }
+  saveMenu();
+  closeModal();
+  renderMenuManagement();
+}
+
+/* --- MODAL CATÉGORIE --- */
+function openAddCatModal() {
+  document.getElementById('modal-cat-title').textContent = 'Nouvelle catégorie';
+  document.getElementById('modal-cat-key').value = '';
+  document.getElementById('modal-cat-emoji').value = '';
+  document.getElementById('modal-cat-name').value = '';
+  document.getElementById('modal-cat-edit').style.display = 'flex';
+}
+
+function openEditCatModal(catKey) {
+  const cat = MENU_DATA[catKey];
+  const parts = cat.label.match(/^(\S+)\s+(.+)$/);
+  document.getElementById('modal-cat-title').textContent = 'Renommer la catégorie';
+  document.getElementById('modal-cat-key').value = catKey;
+  document.getElementById('modal-cat-emoji').value = parts ? parts[1] : '';
+  document.getElementById('modal-cat-name').value = parts ? parts[2] : cat.label;
+  document.getElementById('modal-cat-edit').style.display = 'flex';
+}
+
+function closeCatModal() {
+  document.getElementById('modal-cat-edit').style.display = 'none';
+}
+
+function saveCat() {
+  const existingKey = document.getElementById('modal-cat-key').value;
+  const emoji = document.getElementById('modal-cat-emoji').value || '🍽️';
+  const name = document.getElementById('modal-cat-name').value.trim();
+  if (!name) { alert('Le nom de la catégorie est requis'); return; }
+  const label = `${emoji} ${name}`;
+
+  if (existingKey) {
+    // Renommer
+    MENU_DATA[existingKey].label = label;
+  } else {
+    // Nouvelle catégorie
+    const newKey = name.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_');
+    const maxOrder = Math.max(0, ...Object.values(MENU_DATA).map(c => c.order ?? 0));
+    MENU_DATA[newKey] = { label, items: [], order: maxOrder + 1 };
+  }
+  saveMenu();
+  closeCatModal();
+  renderMenuManagement();
+}
+
+/* --- CONFIRMATION SUPPRESSION --- */
+function closeConfirmModal() {
+  document.getElementById('modal-confirm').style.display = 'none';
+}
+
+function confirmDeleteCat(catKey) {
+  const cat = MENU_DATA[catKey];
+  document.getElementById('confirm-title').textContent = 'Supprimer la catégorie';
+  document.getElementById('confirm-msg').textContent = `Supprimer "${cat.label}" et ses ${cat.items.length} plat(s) ? Cette action est irréversible.`;
+  document.getElementById('confirm-btn').onclick = () => {
+    delete MENU_DATA[catKey];
+    saveMenu();
+    closeConfirmModal();
+    renderMenuManagement();
+  };
+  document.getElementById('modal-confirm').style.display = 'flex';
+}
+
+function confirmDeleteItem(catKey, idx) {
+  const item = MENU_DATA[catKey].items[idx];
+  document.getElementById('confirm-title').textContent = 'Supprimer le plat';
+  document.getElementById('confirm-msg').textContent = `Supprimer "${item.name}" de la carte ?`;
+  document.getElementById('confirm-btn').onclick = () => {
+    MENU_DATA[catKey].items.splice(idx, 1);
+    saveMenu();
+    closeConfirmModal();
+    renderMenuManagement();
+  };
+  document.getElementById('modal-confirm').style.display = 'flex';
+}
+
+/* ============================================================
+   HISTORIQUE
+============================================================ */
+function renderHistory() {
+  const orders = getOrders();
+  const today = new Date().toDateString();
+  const todayOrders = orders.filter(o => new Date(o.timestamp).toDateString() === today);
+  const served = todayOrders.filter(o => o.status === 'served' || o.status === 'cancelled');
+
+  const totalOnline = served.filter(o => ['apple_pay','google_pay','card_online'].includes(o.paymentMethod)).reduce((s,o)=>s+o.total,0);
+  const totalCounter = served.filter(o => o.paymentStatus === 'paid' && ['card_counter','cash'].includes(o.paymentMethod)).reduce((s,o)=>s+o.total,0);
+  const totalPending = served.filter(o => o.paymentStatus === 'pending').reduce((s,o)=>s+o.total,0);
+
+  document.getElementById('history-stats').innerHTML = `
+    <div class="stat-card accent-green">
+      <div class="stat-label">CA en ligne</div>
+      <div class="stat-value">${fmt(totalOnline)}</div>
+    </div>
+    <div class="stat-card accent-blue">
+      <div class="stat-label">CA au comptoir (encaissé)</div>
+      <div class="stat-value">${fmt(totalCounter)}</div>
+    </div>
+    <div class="stat-card accent-orange">
+      <div class="stat-label">En attente encaissement</div>
+      <div class="stat-value">${fmt(totalPending)}</div>
+    </div>
+  `;
+
+  const pmLabels = {
+    apple_pay: ' Apple Pay', google_pay: 'G Pay', card_online: '💳 Carte en ligne',
+    card_counter: '🏧 Carte comptoir', cash: '💵 Espèces'
+  };
+
+  const rows = served.length === 0
+    ? `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px">Aucune commande servie aujourd'hui</td></tr>`
+    : served.map(o => {
+        const d = new Date(o.timestamp);
+        const time = d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+        const isOnline = ['apple_pay','google_pay','card_online'].includes(o.paymentMethod);
+        return `
+          <tr>
+            <td><strong>${o.id}</strong>${o.table ? `<br><span style="font-size:12px;color:#6366F1;font-weight:700">🪑 Table ${o.table}</span>` : ''}</td>
+            <td>${time}</td>
+            <td><strong>${fmt(o.total)}</strong></td>
+            <td>${pmLabels[o.paymentMethod]||o.paymentMethod}</td>
+            <td style="font-size:13px">${o.email}</td>
+            <td>${isOnline||o.paymentStatus==='paid' ? '<span class="badge badge-paid-online">✅ Payé</span>' : '<span class="badge badge-pending-payment">⚠️ En attente</span>'}</td>
+          </tr>
+        `;
+      }).join('');
+  document.getElementById('history-tbody').innerHTML = rows;
+}
+
+/* ============================================================
+   EXPORT CSV
+============================================================ */
+function exportCSV() {
+  const orders = getOrders();
+  const header = 'N° Commande,Table,Date,Heure,HT,TVA,TTC,Pourboire,Mode paiement,Statut paiement,Statut commande,Email';
+  const pmLabels = {
+    apple_pay:'Apple Pay', google_pay:'Google Pay', card_online:'Carte en ligne',
+    card_counter:'Carte comptoir', cash:'Espèces'
+  };
+  const rows = orders.map(o => {
+    const d = new Date(o.timestamp);
+    const isOnline = ['apple_pay','google_pay','card_online'].includes(o.paymentMethod);
+
+    // Calculate HT and TVA
+    let totalHT = 0;
+    let totalTVA = 0;
+    if (o.items && o.items.length > 0) {
+      o.items.forEach(item => {
+        const itemData = findMenuItemById(item.name);
+        const tvaRate = (itemData && itemData.tva) ? itemData.tva : 10;
+        const itemTotal = item.price * item.qty;
+        const itemHT = itemTotal / (1 + tvaRate / 100);
+        const itemTVA = itemTotal - itemHT;
+        totalHT += itemHT;
+        totalTVA += itemTVA;
+      });
+    }
+    const tip = o.tip || 0;
+
+    return [
+      o.id,
+      o.table || '',
+      d.toLocaleDateString('fr-FR'),
+      d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),
+      totalHT.toFixed(2).replace('.',','),
+      totalTVA.toFixed(2).replace('.',','),
+      o.total.toFixed(2).replace('.',','),
+      tip.toFixed(2).replace('.',','),
+      pmLabels[o.paymentMethod]||o.paymentMethod,
+      isOnline?'Payé en ligne':(o.paymentStatus==='paid'?'Encaissé':'À encaisser'),
+      { received:'Reçue', preparing:'En préparation', ready:'Prête', served:'Servie', cancelled:'Annulée' }[o.status]||o.status,
+      o.email
+    ].join(',');
+  });
+  const csv = [header, ...rows].join('\n');
+  const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'commandes-' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click();
+}
+
+function findMenuItemById(itemName) {
+  const keys = Object.keys(MENU_DATA);
+  for (let k of keys) {
+    const found = MENU_DATA[k].items.find(i => i.name === itemName);
+    if (found) return found;
+  }
+  return null;
+}
+
+async function exportAuditLog() {
+  try {
+    const snapshot = await db.collection('audit_log').get();
+    const logs = snapshot.docs.map(doc => ({ ...doc.data() }));
+
+    const header = 'Date,Heure,N° Commande,Événement,Détails,Utilisateur';
+    const rows = logs.map(log => {
+      const d = new Date(log.timestamp);
+      const eventLabels = {
+        'status_changed': 'Changement de statut',
+        'marked_paid': 'Marquée comme payée',
+        'order_created': 'Commande créée',
+        'cancelled': 'Commande annulée'
+      };
+      return [
+        d.toLocaleDateString('fr-FR'),
+        d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),
+        log.orderId || '',
+        eventLabels[log.eventType] || log.eventType,
+        log.details || '',
+        log.user || ''
+      ].join(',');
+    });
+
+    const csv = [header, ...rows].join('\n');
+    const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'journal-evenements-' + new Date().toISOString().split('T')[0] + '.csv';
+    a.click();
+  } catch (e) {
+    console.error('Erreur export journal:', e);
+    alert('Erreur lors de l\'export du journal');
+  }
+}
+
+/* ============================================================
+   GESTION DES PROFILS
+============================================================ */
+let allProfiles = [];
+
+async function loadProfiles() {
+  try {
+    const snap = await db.collection('users').get();
+    allProfiles = snap.docs.map(doc => ({ ...doc.data(), _docId: doc.id }));
+    allProfiles.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  } catch(e) {
+    console.error('Erreur chargement profils:', e);
+    allProfiles = [];
+  }
+}
+
+async function renderProfiles() {
+  await loadProfiles();
+  const tbody = document.getElementById('profiles-tbody');
+  const roleLabels = { admin: '🔑 Gérant', cuisine: '👨‍🍳 Cuisine', serveur: '🍽️ Serveur' };
+
+  if (allProfiles.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:30px">Aucun profil créé. Utilisez le bouton ci-dessus pour en créer un.<br><small>Le compte par défaut admin/admin1234 reste actif tant qu\'aucun profil admin n\'existe.</small></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = allProfiles.map(p => {
+    const lastLogin = p.lastLogin ? new Date(p.lastLogin).toLocaleString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : 'Jamais';
+    return '<tr>' +
+      '<td><strong>' + (p.name || '—') + '</strong></td>' +
+      '<td><code style="background:#F1F5F9;padding:2px 8px;border-radius:4px">' + (p.username || '') + '</code></td>' +
+      '<td>' + (roleLabels[p.role] || p.role) + '</td>' +
+      '<td style="font-size:12px;color:var(--muted)">' + lastLogin + '</td>' +
+      '<td><div style="display:flex;gap:4px">' +
+        '<button onclick="openEditProfileModal(\'' + p._docId + '\')" style="background:#EEF2FF;color:#6366F1;padding:5px 10px;border-radius:6px;font-size:12px;font-weight:700">Modifier</button>' +
+        '<button onclick="deleteProfile(\'' + p._docId + '\',\'' + (p.name || '').replace(/'/g, "\\'") + '\')" style="background:#FEE2E2;color:#EF4444;padding:5px 10px;border-radius:6px;font-size:12px;font-weight:700">Supprimer</button>' +
+      '</div></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function openAddProfileModal() {
+  document.getElementById('profile-modal-title').textContent = 'Nouveau profil';
+  document.getElementById('profile-edit-id').value = '';
+  document.getElementById('profile-name').value = '';
+  document.getElementById('profile-username').value = '';
+  document.getElementById('profile-password').value = '';
+  document.getElementById('profile-role').value = 'serveur';
+  document.getElementById('modal-profile').style.display = 'flex';
+}
+
+function openEditProfileModal(docId) {
+  const profile = allProfiles.find(p => p._docId === docId);
+  if (!profile) return;
+  document.getElementById('profile-modal-title').textContent = 'Modifier le profil';
+  document.getElementById('profile-edit-id').value = docId;
+  document.getElementById('profile-name').value = profile.name || '';
+  document.getElementById('profile-username').value = profile.username || '';
+  document.getElementById('profile-password').value = profile.password || '';
+  document.getElementById('profile-role').value = profile.role || 'serveur';
+  document.getElementById('modal-profile').style.display = 'flex';
+}
+
+function closeProfileModal() {
+  document.getElementById('modal-profile').style.display = 'none';
+}
+
+async function saveProfile() {
+  const docId = document.getElementById('profile-edit-id').value;
+  const name = document.getElementById('profile-name').value.trim();
+  const username = document.getElementById('profile-username').value.trim().toLowerCase();
+  const password = document.getElementById('profile-password').value;
+  const role = document.getElementById('profile-role').value;
+
+  if (!name || !username || !password) {
+    alert('Veuillez remplir tous les champs');
+    return;
+  }
+  if (password.length < 4) {
+    alert('Le mot de passe doit contenir au moins 4 caractères');
+    return;
+  }
+  // Check username uniqueness
+  const existing = allProfiles.find(p => p.username === username && p._docId !== docId);
+  if (existing) {
+    alert('Cet identifiant est déjà utilisé par ' + existing.name);
+    return;
+  }
+
+  const profileData = { name, username, password, role };
+
+  try {
+    if (docId) {
+      await db.collection('users').doc(docId).update(profileData);
+      await logEvent(null, 'profile_updated', 'Profil modifié: ' + name + ' (' + role + ')');
+    } else {
+      profileData.createdAt = new Date().toISOString();
+      profileData.lastLogin = null;
+      await db.collection('users').add(profileData);
+      await logEvent(null, 'profile_created', 'Profil créé: ' + name + ' (' + role + ')');
+    }
+    closeProfileModal();
+    renderProfiles();
+  } catch(e) {
+    alert('Erreur lors de la sauvegarde: ' + e.message);
+  }
+}
+
+async function deleteProfile(docId, name) {
+  if (!confirm('Supprimer le profil "' + name + '" ?')) return;
+  // Prevent deleting yourself
+  if (currentUser && currentUser._docId === docId) {
+    alert('Vous ne pouvez pas supprimer votre propre compte !');
+    return;
+  }
+  try {
+    await db.collection('users').doc(docId).delete();
+    await logEvent(null, 'profile_deleted', 'Profil supprimé: ' + name);
+    renderProfiles();
+  } catch(e) {
+    alert('Erreur: ' + e.message);
+  }
+}
+
+/* ============================================================
+   UTILITAIRES
+============================================================ */
+function fmt(amount) {
+  return amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+}
+</script>
+</body>
+</html>
